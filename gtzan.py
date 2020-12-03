@@ -4,14 +4,20 @@ import glob
 import pandas as pd
 import numpy as np
 import librosa
+import librosa.display
+import copy
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import torch
+from torch.utils.data import Dataset
+from sklearn.model_selection import train_test_split
 # REAL DATA
-# DATA_PATH = 'GTZAN'
+DATA_PATH = 'GTZAN'
 # df = pd.read_csv('%s/features_30_sec.csv' % DATA_PATH)
 # df['filePath'] = DATA_PATH + '/genres_original/' + df['label'] + '/' + df['filename']
-
+# df = getDataFrame(True)
 # TEST DATA
-df = pd.read_csv('test.csv')
+# df = pd.read_csv('test.csv')
 genre_mapping = {
     'blues': 0,
     'classical': 1,
@@ -30,57 +36,88 @@ class GtzanData:
     GTZAN Data generator using data augmentation techniques
     Options (for now):
         - noise-injection: (0, 0.2, step=0.001)
+        - pitch-shift: (-5, 5, 0.5)
         - time-stretch: (0.8, 1.2, step=0.02)
         - patches_per_spectrogram: 1 (should we? probably not)
     """
-    def __init__(self, noise_injection=(0.0, 0.1, 0.02)):
-        self.initDataFrame(noise_injection)
+    def __init__(
+        self,
+        noise_injection=(0.0, 0.1, 0.02),
+        pitch_shift=(-5, 0, 1),
+        test_size=0.1,
+    ):
+        init_x, self.test_x, init_y, self.test_y = train_test_split(df['filePath'],
+                                                                df['label'],
+                                                                test_size=test_size)
+        print(len((init_x, init_y)))
+        self.init_dataframe(init_x, init_y, noise_injection, pitch_shift)
+    
+    def __len__(self):
+        return len(self.train_y)
+    def __getitem__(self, index):
+        return self.train_x[index]
+    
+    def init_dataframe(self, init_x, init_y, noise_injection, pitch_shift):
+        self.set_up_buckets(init_x, init_y)
 
-    def initDataFrame(self, noise_injection):
-        # calculate length of tensors to hold data
-        DATA_LENGTH = len(df)
-
-        NOISE_INJECTION_STEPS = ((noise_injection[1] - noise_injection[0]) / noise_injection[2]) - 1
-        NUM_OF_AUGMENTED_DATA = (DATA_LENGTH) * NOISE_INJECTION_STEPS
-
-        FULL_DATA_LENGTH = int(DATA_LENGTH + NUM_OF_AUGMENTED_DATA)
-        print('data length is %i' % (DATA_LENGTH))
-        print('Noise injections: %i' % (NOISE_INJECTION_STEPS))
-        print('Creating %i spectrograms and labels' % (FULL_DATA_LENGTH))
-        print('NI:' + str(noise_injection))
-
-        self.spectrograms = np.full((FULL_DATA_LENGTH, 80, 911), -1)
-        self.labels = np.full((FULL_DATA_LENGTH), -1)
-
-        for index, row in tqdm(df.iterrows()):
-            fileName = row['filePath']
-            wave_data, sample_rate = librosa.core.load(fileName, 
-                                               sr    = None, 
-                                               mono  = True, 
+        NOISE_INJECTION_STEPS = ((noise_injection[1] - noise_injection[0]) / noise_injection[2])
+        PITCH_SHIFT_STEPS = ((pitch_shift[1] - pitch_shift[0]) / pitch_shift[2])
+        NUM_OF_AUGMENTED_DATA = (len(self.train_x)) * (NOISE_INJECTION_STEPS + PITCH_SHIFT_STEPS)
+        print('Entering init_dataframe loop')
+        
+        for index, filePath in tqdm(init_x.iteritems()):
+            wave_data, sample_rate = librosa.core.load(filePath, 
+                                               sr    = None,
+                                               mono  = True,
                                                dtype = np.float32)
             # We have the wave data now lets augment it -> Noise injection first
-            print('Occupying: %i' % (int(index + index * NOISE_INJECTION_STEPS)))
             self.create_noise_injected_data(wave_data,
                                         sample_rate,
                                         noise_injection,
-                                        int(index + index * NOISE_INJECTION_STEPS),
-                                        genre_mapping[str(row['label'])])
-            self.spectrograms[int(index + index * NOISE_INJECTION_STEPS)] = create_spectrogram(wave_data, sample_rate, 16000)
-            self.labels[int(index * NOISE_INJECTION_STEPS)] = genre_mapping[str(row['label'])]
+                                        genre_mapping[str(init_y[index])])
+            self.create_pitch_shifted_data(wave_data,
+                                        sample_rate,
+                                        pitch_shift,
+                                        genre_mapping[str(init_y[index])])
+        # Now that its done lets turn it all to tensors
+        self.train_x = np.array(self.train_x)
+        self.train_y = np.array(self.train_y)
+        print(self.train_x.shape, self.train_y.shape)
     
     
-    def create_noise_injected_data(self, wd, sr, ni, pivot, label):
-        step = 1
-        print(str(ni))
+    def create_noise_injected_data(self, wd, sr, ni, label):
         for noise_factor in np.arange(ni[0] + ni[2], ni[1] + ni[2], ni[2]):
+            if noise_factor == 0: continue
+
             print('noise factor: %f' % (noise_factor))
-            print('index occupied: %i' % (int(pivot + step)))
             noise = np.random.randn(len(wd))
             augmented_data = wd + noise_factor * noise
-            # # Cast back to same data type
-            self.spectrograms[int(pivot + step)] = create_spectrogram(augmented_data.astype(type(wd[0])), sr, 16000)
-            self.labels[int(pivot + step)] = label
-            step += 1
+            self.train_x.append(create_spectrogram(augmented_data.astype(type(wd[0])), sr, 16000))
+            self.train_y.append(label)
+    def create_pitch_shifted_data(self, wd, sr, ps, label):
+        for pitch_factor in np.arange(ps[0], ps[1], ps[2]):
+            if pitch_factor == 1: continue
+
+            print('pitch factor: %f' % (pitch_factor))
+            augmented_data = librosa.effects.pitch_shift(wd, sr, pitch_factor)
+            self.train_x.append(create_spectrogram(augmented_data.astype(type(wd[0])), sr, 16000))
+            self.train_y.append(label)
+    def set_up_buckets(self, init_x, init_y):
+        self.train_x = []
+        self.train_y = []
+        print('Entering set_up_buckets loop')
+        print('num of iterations: %i' % (init_x.size))
+
+        for index, row in tqdm(init_x.iteritems()):
+            wave_data, sample_rate = librosa.core.load(row, 
+                                               sr    = None,
+                                               mono  = True,
+                                               dtype = np.float32)
+            self.train_x.append(create_spectrogram(wave_data, sample_rate, 16000))
+            self.train_y.append(init_y[index])
+        print(len(self.train_x), self.train_y)
+        print(self.train_x[0])
+
             
 
 def create_spectrogram(wave_data, sample_rate, sample_rate_new = 16000):
@@ -107,12 +144,34 @@ def create_spectrogram(wave_data, sample_rate, sample_rate_new = 16000):
 
     # transform to Decibel scale
     spectrogram = librosa.power_to_db(spectrogram)
-
     # re-shape to final segment size
     return spectrogram.astype(np.float32)
+def getDataFrame(is_test):
+        temp_df = None
+        if is_test:
+            temp_df = pd.read_csv('test.csv')
+        else:
+            temp_df = pd.read_csv('%s/features_30_sec.csv' % DATA_PATH)
+        
+        temp_df['filePath'] = DATA_PATH + '/genres_original/' + temp_df['label'] + '/' + temp_df['filename']
 
+        ids = copy.deepcopy(temp_df['filename'])
+        bits = []
+        index = 0
+
+        for id in ids:
+            bits = id.split('.')
+            ids[index] = 'id-'+bits[0][0:2]+bits[1]+'-original'
+            index += 1
+        temp_df['ID'] = ids
+
+        return temp_df.loc[:, ['ID','filePath', 'label']]
+df = getDataFrame(True)
 testInst = GtzanData()
-print(testInst.labels.shape)
-print(testInst.spectrograms.shape)
-print(testInst.spectrograms[0])
-print(testInst.labels[0])
+# print(testInst.labels.shape)
+# print(testInst.spectrograms.shape)
+# print(testInst.spectrograms[0])
+# print(testInst.labels[0])
+# fig, ax = plt.subplots()
+# img = librosa.display.specshow(testInst.spectrograms[0], ax=ax)
+# fig.colorbar(img, ax=ax)

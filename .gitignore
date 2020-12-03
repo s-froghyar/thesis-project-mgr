@@ -3,3 +3,4 @@ MER_audio_taffc_dataset/
 MER_audio_taffc_dataset.pkl
 GTZAN/
 __pycache__
+.vscode/
