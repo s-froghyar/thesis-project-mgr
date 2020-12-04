@@ -37,8 +37,6 @@ class GtzanData:
     Options (for now):
         - noise-injection: (0, 0.2, step=0.001)
         - pitch-shift: (-5, 5, 0.5)
-        - time-stretch: (0.8, 1.2, step=0.02)
-        - patches_per_spectrogram: 1 (should we? probably not)
     """
     def __init__(
         self,
@@ -50,13 +48,23 @@ class GtzanData:
                                                                 df['label'],
                                                                 test_size=test_size)
         print(len((init_x, init_y)))
+        self.prep_test_values()
         self.init_dataframe(init_x, init_y, noise_injection, pitch_shift)
     
     def __len__(self):
         return len(self.train_y)
     def __getitem__(self, index):
         return self.train_x[index]
-    
+    def prep_test_values(self):
+        new_test_x = []
+        new_test_y = []
+        for index, path in self.test_x.iteritems():
+            new_test_x.append(create_spectrogram_from_filepath(path))
+            new_test_y.append(genre_mapping[str(self.test_y[index])])
+        self.test_x = np.array(new_test_x)
+        self.test_y = np.array(new_test_y)
+        print('Tests created: ', self.test_x.shape, self.test_y.shape)
+        print(self.test_x[0])
     def init_dataframe(self, init_x, init_y, noise_injection, pitch_shift):
         self.set_up_buckets(init_x, init_y)
 
@@ -114,12 +122,31 @@ class GtzanData:
                                                mono  = True,
                                                dtype = np.float32)
             self.train_x.append(create_spectrogram(wave_data, sample_rate, 16000))
-            self.train_y.append(init_y[index])
+            self.train_y.append(genre_mapping[str(init_y[index])])
         print(len(self.train_x), self.train_y)
         print(self.train_x[0])
 
-            
+class GtzanDataset(Dataset):
+    def __init__(self, X, y, transform=None):
+        self.X = X
+        self.y = y
+        self.transform = transform
+    def __getitem__(self, index):
+        if self.transform is not None:
+            return (self.transform(self.X[index]), self.y[index]) 
+        return (self.X[index], y[index])
+    def __len__(self):
+        return len(self.X)  
 
+
+
+
+def create_spectrogram_from_filepath(filePath):
+    wave_data, sample_rate = librosa.core.load(filePath, 
+                                               sr    = None,
+                                               mono  = True,
+                                               dtype = np.float32)
+    return create_spectrogram(wave_data, sample_rate)
 def create_spectrogram(wave_data, sample_rate, sample_rate_new = 16000):
     # downsample to fs = 16kHz 
     wave_data = librosa.core.resample(wave_data, 
@@ -167,7 +194,6 @@ def getDataFrame(is_test):
 
         return temp_df.loc[:, ['ID','filePath', 'label']]
 df = getDataFrame(True)
-testInst = GtzanData()
 # print(testInst.labels.shape)
 # print(testInst.spectrograms.shape)
 # print(testInst.spectrograms[0])
