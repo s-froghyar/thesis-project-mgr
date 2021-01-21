@@ -1,6 +1,5 @@
 .ipynb_checkpoints/
-MER_audio_taffc_dataset/
-MER_audio_taffc_dataset.pkl
+**/gtzan_test
 GTZAN/
 __pycache__
 .vscode/
