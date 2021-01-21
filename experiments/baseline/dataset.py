@@ -144,10 +144,10 @@ class GtzanWave:
 class GtzanDataset(Dataset):
     def __init__(self, X, y, train=False):
         self.X = X
-        self.y = y
+        self.targets = y
         self.train = train
     def __getitem__(self, index):
-        return (self.transform(self.X[index]), self.y[index]) 
+        return (self.transform(self.X[index]), self.targets[index]) 
     def __len__(self):
         return len(self.X)
     def transform(self, x):

@@ -5,14 +5,14 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import argparse
 
-from ..reporter import Reporter
+from reporter import Reporter
 from dataset import load_data, GtzanDataset
 from baseline_cnn import CNN
 
 def main(args):
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    reporter = Reporter('baseline')
     is_test = True
 
     # Load Data
@@ -25,7 +25,7 @@ def main(args):
     test_loader = DataLoader(dataset=test_dataset, batch_size=args.batch_size, shuffle=True)
 
     # Initialize network
-    model = CNN('yeet', use_tensorboard=False).to(device)
+    model = CNN('yeet', get_report_data=True).to(device)
 
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -48,16 +48,15 @@ def main(args):
 
             # gradient descent or adam step
             optimizer.step()
+    
+    reporter.set_post_training_values(model, train_loader)
 
-    check_accuracy(train_loader, model)
-    check_accuracy(test_loader, model)
-
-
+    # check_accuracy(train_loader, model, device)
+    # check_accuracy(test_loader, model, device)
 
 # Check accuracy on training & test to see how good our model
 
-
-def check_accuracy(loader, model):
+def check_accuracy(loader, model, device):
     if loader.dataset.train:
         print("Checking accuracy on training data")
     else:
@@ -83,11 +82,8 @@ def check_accuracy(loader, model):
 
     model.train()
 
-
-
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="olivetti augerino")
+    parser = argparse.ArgumentParser(description="Baseline CNN")
 
     parser.add_argument(
         "--dir",
