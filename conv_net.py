@@ -13,10 +13,21 @@ import numpy as np
 
 from gtzan import GtzanData
 from gtzan import GtzanDataset
+
+class Config:  
+  def __init__(self, **kwargs):
+    for key, value in kwargs.items():
+      setattr(self, key, value)
+  def __str__(self):
+    output = ""
+    for name, var in vars(self).items(): #Iterate over the values
+      output += name + ": " + str(var) + "\n"
+    return output
+
 # Simple CNN
 
 class CNN(nn.Module):
-    def __init__(self, in_channels=1, num_classes=10):
+    def __init__(self, name, use_tensorboard=True):
         super(CNN, self).__init__()
         self.conv1 = nn.Conv2d(
             in_channels=1,
@@ -36,6 +47,9 @@ class CNN(nn.Module):
         self.pool2 = nn.MaxPool2d(kernel_size=(2, 2))
 
         self.fc1 = nn.Linear(16 * 7 * 7, num_classes)
+        if use_tensorboard:
+          self.train_summary_writer = SummaryWriter('logs/tensorboard/' + name + '/train')
+          self.test_summary_writer = SummaryWriter('logs/tensorboard/' + name + '/test')
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -77,6 +91,127 @@ transform = transforms.Compose(
 
 train_dataset = GtzanDataset(GTZAN.train_x, GTZAN.train_y, transform=transform)
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size)
+
+class Trainer:  
+  def __init__(self, config):
+    self.name = config.name
+    self.model_type = config.model_type
+    print('Training of ', self.name, ' just started...')
+    # parameters
+    self.level_of_dropout = config.level_of_dropout
+    self.pooling_type = config.pooling_type
+    self.activation_fn = config.activation_fn
+    self.epochs = config.epochs
+    self.batch_size = config.batch_size
+    self.display_logs = config.display_logs
+    self.use_tensorboard = config.use_tensorboard
+
+    self.cuda = True if torch.cuda.is_available() else False
+    self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    self.log_interval = 100
+    self.globaliter = 0
+
+    self.training_loss_values = []
+    self.test_accuracies = []
+    self.final_avg_loss = None
+    self.final_accuracy = None
+    
+    torch.manual_seed(1)
+    kwargs = {'num_workers': 1, 'pin_memory': True} if self.cuda else {}
+
+    self.train_loader = torch.utils.data.DataLoader(
+        datasets.FashionMNIST('../data', train=True, download=True,
+                     transform=transforms.Compose([
+                         transforms.ToTensor(),
+                         transforms.Normalize((0.1307,), (0.3081,))
+                     ])),
+        batch_size=self.batch_size, shuffle=True, **kwargs)
+
+    self.test_loader = torch.utils.data.DataLoader(
+        datasets.FashionMNIST('../data', train=False, transform=transforms.Compose([
+                             transforms.ToTensor(),
+                             transforms.Normalize((0.1307,), (0.3081,))
+                         ])),
+        batch_size=1000, shuffle=True, **kwargs)
+
+    self.model = CNN(
+        self.name,
+        level_of_dropout=self.level_of_dropout,
+        pooling_type=self.pooling_type,
+        activation_fn=self.activation_fn,
+        use_tensorboard=self.use_tensorboard
+    ).to(self.device)
+    
+    self.optimizer = optim.SGD(self.model.parameters(), lr=0.01, momentum=0.5)
+   
+  
+  def train(self, epoch):
+
+    self.model.train()
+    for batch_idx, (data, target) in enumerate(self.train_loader):
+      
+      self.globaliter += 1
+      data, target = data.to(self.device), target.to(self.device)
+
+      self.optimizer.zero_grad()
+      predictions = self.model(data)
+
+      loss = F.nll_loss(predictions, target)
+      loss.backward()
+      self.optimizer.step()
+
+      if batch_idx % self.log_interval == 0:
+        if self.display_logs:
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                  epoch, batch_idx * len(data), len(self.train_loader.dataset),
+                  100. * batch_idx / len(self.train_loader), loss.item()))
+        #Tensorboard logging at the end of each batch
+        if self.use_tensorboard:
+            self.model.train_summary_writer.add_scalar("loss", loss.item(), self.globaliter)
+        self.training_loss_values.append(loss.item())
+
+            
+  def test(self, epoch):
+    self.model.eval()
+    test_loss = 0
+    correct = 0
+    accuracy = 0
+
+    with torch.no_grad():
+      for data, target in self.test_loader:
+        data, target = data.to(self.device), target.to(self.device)
+        predictions = self.model(data)
+
+        test_loss += F.nll_loss(predictions, target, reduction='sum').item()
+        prediction = predictions.argmax(dim=1, keepdim=True)
+        correct += prediction.eq(target.view_as(prediction)).sum().item()
+
+      test_loss /= len(self.test_loader.dataset)
+      accuracy = 100. * correct / len(self.test_loader.dataset)
+      if self.display_logs:
+        print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+          test_loss, correct, len(self.test_loader.dataset), accuracy))
+      
+      #Tensorboard logging, but at the end of each testing epoch
+      if self.use_tensorboard:
+        self.model.test_summary_writer.add_scalar("loss", test_loss, self.globaliter)
+        self.model.test_summary_writer.add_scalar("accuracy", accuracy, self.globaliter)
+      self.test_accuracies.append(accuracy)
+    self.final_avg_loss = test_loss
+    self.final_accuracy = accuracy
+  def record_performance_data(self):
+    for epoch in range(1, self.epochs + 1):
+      self.train(epoch)
+      self.test(epoch)
+    if self.use_tensorboard:
+      self.model.train_summary_writer.close()
+      self.model.test_summary_writer.close()
+    print('Training of ',                   self.name,
+          ' completed with average loss: ', self.final_avg_loss,
+          ' and accuracy: ',                self.final_accuracy)
+
+    return self.final_avg_loss, self.final_accuracy
+  
 # train_loader = DataLoader(dataset=np.append(X_train, y_train, axis=1), batch_size=batch_size)
 # # test_dataset = datasets.MNIST(
 # #     root="dataset/", train=False, transform=transforms.ToTensor(), download=True
