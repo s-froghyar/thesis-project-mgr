@@ -5,14 +5,14 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import argparse
 
-from reporter import Reporter
+from .reporter import Reporter
 from dataset import load_data, GtzanDataset
 from baseline_cnn import CNN
 
 def main(args):
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    reporter = Reporter('baseline')
+    reporter = Reporter('baseline', args.epochs)
     is_test = True
 
     # Load Data
@@ -24,8 +24,9 @@ def main(args):
     test_dataset = GtzanDataset(GTZAN.test_x, GTZAN.test_y, train=False)
     test_loader = DataLoader(dataset=test_dataset, batch_size=args.batch_size, shuffle=True)
 
-    # Initialize network
+    # Initialize network and reporter
     model = CNN('yeet', get_report_data=True).to(device)
+    reporter.record_first_batch(model, len(train_dataset), train_dataset[0][0])
 
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -33,54 +34,29 @@ def main(args):
     # Train Network
     for epoch in range(args.epochs):
         print('epoch num ', epoch)
+        reporter.reset_epoch_data()
         for batch_idx, (data, targets) in tqdm(enumerate(train_loader)):
             # Get data to cuda if possible
             data = data.to(device=device)
             targets = targets.to(device=device)
 
             # forward
-            scores = model(data)
-            loss = criterion(scores, targets)
-
+            preds = model(data)
+            loss = criterion(preds, targets)
+            reporter.record_batch_data(preds, targets, loss)
             # backward
             optimizer.zero_grad()
             loss.backward()
 
             # gradient descent or adam step
             optimizer.step()
-    
-    reporter.set_post_training_values(model, train_loader)
+        reporter.record_epoch_data(model, epoch)
+    reporter.set_post_training_values(model, train_dataset, test_dataset)
 
-    # check_accuracy(train_loader, model, device)
-    # check_accuracy(test_loader, model, device)
+    train_num_correct, test_num_correct = reporter.report_on_model()
+    print('train_num_correct', train_num_correct)
+    print('test_num_correct', test_num_correct)
 
-# Check accuracy on training & test to see how good our model
-
-def check_accuracy(loader, model, device):
-    if loader.dataset.train:
-        print("Checking accuracy on training data")
-    else:
-        print("Checking accuracy on test data")
-
-    num_correct = 0
-    num_samples = 0
-    model.eval()
-
-    with torch.no_grad():
-        for x, y in loader:
-            x = x.to(device=device)
-            y = y.to(device=device)
-
-            scores = model(x)
-            _, predictions = scores.max(1)
-            num_correct += (predictions == y).sum()
-            num_samples += predictions.size(0)
-
-        print(
-            f"Got {num_correct} / {num_samples} with accuracy {float(num_correct)/float(num_samples)*100:.2f}"
-        )
-
-    model.train()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Baseline CNN")
