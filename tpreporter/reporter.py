@@ -3,7 +3,7 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 import torchvision
 from sklearn.metrics import confusion_matrix
-from reporter_utils import *
+from .reporter_utils import *
 
 possible_names = ['baseline', 'segmented']
 

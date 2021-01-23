@@ -1,0 +1,11 @@
+Metadata-Version: 1.2
+Name: tpreporter
+Version: 1.0
+Summary: data generator for training Pytorch neural networks
+Home-page: UNKNOWN
+Author: SomaF
+Author-email: froghyar.soma@gail.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Requires-Python: >=3.6

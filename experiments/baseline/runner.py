@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import argparse
 
-from .reporter import Reporter
+from tpreporter import Reporter
 from dataset import load_data, GtzanDataset
 from baseline_cnn import CNN
 
