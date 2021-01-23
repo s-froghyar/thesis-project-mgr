@@ -4,3 +4,5 @@ GTZAN/
 __pycache__
 .vscode/
 reports/
+build/
+in_dev/

@@ -1,9 +1,0 @@
-README.md
-setup.py
-tpreporter/__init__.py
-tpreporter/reporter.py
-tpreporter/reporter_utils.py
-tpreporter.egg-info/PKG-INFO
-tpreporter.egg-info/SOURCES.txt
-tpreporter.egg-info/dependency_links.txt
-tpreporter.egg-info/top_level.txt

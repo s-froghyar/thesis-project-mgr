@@ -1,3 +1,4 @@
+--extra-index-url https://api.packagr.app/public
 absl-py==0.11.0
 appdirs==1.4.4
 audioread==2.1.9
@@ -55,7 +56,6 @@ threadpoolctl==2.1.0
 torch==1.7.1
 torchaudio==0.7.2
 torchvision==0.8.2
-tpreporter @ file:///Users/somaf/Dropbox/My%20Mac%20%28SomaF%E2%80%99s%20MacBook%20Pro%29/Documents/MSci%20Software%20Engineering/Year%205/Project/repo/final-year-project-tp/dist/tpreporter-1.0-py3-none-any.whl
 tqdm==4.56.0
 twine==3.3.0
 typing-extensions==3.7.4.3
