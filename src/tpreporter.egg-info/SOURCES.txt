@@ -1,4 +1,3 @@
-README.md
 setup.py
 tpreporter/__init__.py
 tpreporter/reporter.py

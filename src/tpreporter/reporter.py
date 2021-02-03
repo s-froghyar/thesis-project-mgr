@@ -34,7 +34,7 @@ class Reporter():
         if name not in possible_names:
             raise ValueError('name is not recognized from possible experiment names')
         
-        my_path = os.path.join(os.getcwd(), 'reports', name)
+        my_path = os.path.join(os.getcwd(), 'data', 'reports', name)
 
         if os.path.exists(my_path):
             for root, dirs, files in os.walk(my_path):
@@ -42,7 +42,7 @@ class Reporter():
                     os.remove(os.path.join(root, file))
 
         self.name = name
-        self.log_path = 'reports/' + name + '/train'
+        self.log_path = 'data/reports/' + name + '/train'
         self.max_epochs = max_epochs
 
         self.train_confusion_matrix = None

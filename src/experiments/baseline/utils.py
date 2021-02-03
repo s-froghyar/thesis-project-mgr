@@ -1,4 +1,5 @@
 import librosa
+import os
 import librosa.display
 import pandas as pd
 import numpy as np
@@ -60,7 +61,7 @@ def get_data_frame(is_test):
             temp_df = pd.read_csv('test.csv')
         else:
             temp_df = pd.read_csv('%s/features_30_sec.csv' % DATA_PATH)
-        
+        print(DATA_PATH)
         temp_df['filePath'] = DATA_PATH + '/genres_original/' + temp_df['label'] + '/' + temp_df['filename']
 
         ids = copy.deepcopy(temp_df['filename'])
@@ -74,6 +75,17 @@ def get_data_frame(is_test):
         temp_df['ID'] = ids
 
         return temp_df.loc[:, ['ID','filePath', 'label']]
+
+def update_data_path(is_cluster):
+    global DATA_PATH
+    if is_cluster:
+        print("Running on cluster")
+        DATA_PATH = "/home/2267217f/data"
+    else:
+        print("Running locally")
+        DATA_PATH = os.path.join(os.getcwd(), 'data', 'GTZAN')
+
+
 def str2bool(v):
     if isinstance(v, bool):
        return v
