@@ -48,7 +48,7 @@ class GtzanWave:
         return self.train_x[index]
 
     def prep_test_values(self):
-        ''' generate the spectrograms for the test values and store them'''
+        '''generate the spectrograms for the test values and store them'''
 
         print("Preparing test values...")
         new_test_x = []
@@ -58,7 +58,7 @@ class GtzanWave:
                                                sr    = BASE_SAMPLE_RATE,
                                                mono  = True,
                                                dtype = np.float32)
-            new_test_x.append(wave_data[:465984])
+            new_test_x.append(generate_6_strips(wave_data))
             new_test_y.append(genre_mapping[str(self.test_y[index])])
         self.test_x = np.array(new_test_x)
         self.test_y = np.array(new_test_y)
@@ -100,7 +100,7 @@ class GtzanWave:
             noise = np.random.randn(len(wd))
             augmented_data = wd + noise_factor * noise
             
-            self.train_x.append(augmented_data[:465984])
+            self.train_x.append(generate_6_strips(augmented_data))
             self.train_y.append(label)
     
     def create_pitch_shifted_data(self, wd, sr, ps, label):
@@ -109,7 +109,7 @@ class GtzanWave:
             
             augmented_data = librosa.effects.pitch_shift(wd, sr, pitch_factor)
             
-            self.train_x.append(augmented_data[:465984])
+            self.train_x.append(generate_6_strips(augmented_data))
             self.train_y.append(label)
             
     def set_up_buckets(self, init_x, init_y):
@@ -125,7 +125,7 @@ class GtzanWave:
                                                sr    = BASE_SAMPLE_RATE,
                                                mono  = True,
                                                dtype = np.float32)
-            self.train_x.append(wave_data[:465984])
+            self.train_x.append(generate_6_strips(wave_data))
             self.train_y.append(genre_mapping[str(init_y[index])])
     def give_report(self):
         print("Data Augmentation is completed with results:")

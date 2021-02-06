@@ -4,10 +4,11 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import argparse
+import numpy as np
 
 from tpreporter import Reporter
 from dataset import load_data, GtzanDataset
-from baseline_cnn import CNN
+from segmented_cnn import CNN
 from utils import str2bool
 
 def main(args):
@@ -27,7 +28,7 @@ def main(args):
 
     # Initialize network and reporter
     model = CNN('yeet', get_report_data=True).to(device)
-    reporter.record_first_batch(model, len(train_dataset), train_dataset[0][0])
+    reporter.record_first_batch(model, len(train_dataset), train_dataset[0][0][0,:,:])
 
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -36,13 +37,14 @@ def main(args):
     for epoch in range(args.epochs):
         reporter.reset_epoch_data()
         for batch_idx, (data, targets) in tqdm(enumerate(train_loader)):
-            # Get data to cuda if possible
-            data = data.to(device=device)
-            targets = targets.to(device=device)
-
-            # forward
-            preds = model(data)
-            loss = criterion(preds, targets)
+            preds_sum = torch.from_numpy(np.zeros((data.shape[0], 10)))
+            for i in range(6):
+                # Get data to cuda if possible
+                strip_data = data[:,i,:,:].to(device=device)
+                targets = targets.to(device=device)
+                preds = model(strip_data)
+                preds_sum += preds
+            loss = criterion(preds_sum, targets)
             reporter.record_batch_data(preds, targets, loss)
             # backward
             optimizer.zero_grad()

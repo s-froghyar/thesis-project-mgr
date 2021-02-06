@@ -27,12 +27,12 @@ RUN useradd -m 2267217f
 
 RUN chown -R 2267217f:2267217f /home/2267217f
 
-COPY --chown=2267217f ./src /home/2267217f/app
-COPY --chown=2267217f requirement.txt /home/2267217f/app/requirements.txt
+COPY --chown=2267217f . /home/2267217f/app
+COPY --chown=2267217f req.txt /home/2267217f/app/requirements.txt
 
 USER 2267217f
 
-RUN cd /home/2267217f/app/ && python3.7 -m pip install -r requirements.txt && python3.7 -m pip install dist/*
+RUN cd /home/2267217f/app/ && python3.7 -m pip install -r requirements.txt
 
 WORKDIR /home/2267217f
 
