@@ -110,3 +110,6 @@ class Reporter():
         if (epoch-1) == self.max_epochs:
             print('report is available through tensorboard in the reports folder')
             self.train_summary_writer.close()
+    # TODO
+    def keep_log(log_string):
+        print(log_string)

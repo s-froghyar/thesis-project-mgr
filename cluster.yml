@@ -27,9 +27,9 @@ spec:
       - name: tpproject-container  
         image: somaf/tpproject:baseline-cluster
         # the container will run the secondjob.py script from your external filespace 
-        # command: 
-        #   - "python3"
-        #   - "/nfs/secondjob.py"
+        command: 
+          - "python"
+          - "/nfs/secondjob.py"
         resources:
           requests:
             # the "m" suffix here means "millicores", so 1 physical CPU
@@ -51,16 +51,14 @@ spec:
           name: nfs-access
         # example of defining an environment variable and its value, so that they
         # will be visible inside this container
-        env:
-        - name: SOME_ENV_VAR
-          value: "env var value"
+        # env:
+        # - name: SOME_ENV_VAR
+        #   value: "env var value"
       # this defines a volume called nfs-access which corresponds to your cluster
       # filespace. 
       volumes:
       - name: nfs-access
-        persistentVolumeClaim: 
-          # XXX replace <USERNAME> with your user account name
-          # e.g. if username is abc123, this value should be set to abc123vol1claim
+        persistentVolumeClaim:
           claimName: 2267217fvol1claim 
       # in some cases you will want to run your job on a node with a specific type of
       # GPU. the nodeSelector section allows you to do this. The compute nodes each

@@ -2,7 +2,6 @@ import torch
 import itertools
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 
 def get_num_correct(preds, labels):
     return preds.argmax(dim=1).eq(torch.from_numpy(labels)).sum().item()
@@ -10,7 +9,7 @@ def get_num_correct(preds, labels):
 @torch.no_grad()
 def get_all_preds(model, loader):
     all_preds = torch.tensor([])
-    for batch in tqdm(loader):
+    for batch in loader:
         images, labels = batch
 
         preds = model(images)
