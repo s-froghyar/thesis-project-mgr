@@ -2,6 +2,17 @@ from .models import BaselineCNN, SegmentedCNN, TpCNN, AugerinoCNN
 import torch
 import torch.optim as optim
 
+class AugmentationParameters:
+    def __init__(self, ni, ps, is_segmented):
+        self.noise_injection = ni
+        self.pitch_shift = ps
+        self.segmented = is_segmented
+    def __str__(self):
+        return str(dict(
+            noise_injection = self.noise_injection,
+            pitch_shift = self.pitch_shift,
+            segmented = self.segmented
+        ))
 class CNNconfig:
     batch_size = 64
     test_batch_size = 64
@@ -27,29 +38,17 @@ class CNNconfig:
 
 class BaselineCNNconfig(CNNconfig):
     model = BaselineCNN
-    aug_params = dict(
-        segmented=False,
-        noise_injection=(0.0, 0.1, 0.02),
-        pitch_shift=(-5, 0, 1)
-    )
+    aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1), False )
+
 class SegmentedCNNconfig(CNNconfig):
     model = SegmentedCNN
-    aug_params = dict(
-        segmented=True,
-        noise_injection=(0.0, 0.1, 0.02),
-        pitch_shift=(-5, 0, 1)
-    )
+    aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1), True )
+
 class TpCNNconfig(CNNconfig):
     model = TpCNN
-    aug_params = dict(
-        segmented=False,
-        noise_injection=(0.0, 0.1, 0.02),
-        pitch_shift=(-5, 0, 1)
-    )
+    aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1), True )
+
 class AugerinoCNNconfig(CNNconfig):
     model = AugerinoCNN
-    aug_params = dict(
-        segmented=False,
-        noise_injection=(0.0, 0.1, 0.02),
-        pitch_shift=(-5, 0, 1)
-    )
+    aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1), True )
+

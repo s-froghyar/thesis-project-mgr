@@ -1,43 +1,37 @@
-# standard Job preamble, the only thing you'll typically 
-# want to change in these first few lines is the "name" field
-# to whatever you want, and the "namespace" field to match
-# your project name
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: tpproject
-  # XXX replace <USERNAME> with your user account name
-  # e.g. if username is abc123, this value should be set to abc123project
+  name: tpproject-baseline
   namespace: 2267217fproject
 # this is where you define the content of the Job
 spec:
-  # this controls how many times the pod created to run the container defined
-  # below will be restarted if an error occurs. By default the container will
-  # be restarted up to 6 times which probably isn't what you want!
-  backoffLimit: 0
+  parallelism: 1
+  completions: 1
   template:        
     metadata:
       name: tpproject
     spec:
-      # in the "containers:" section you define the container(s) that
-      # will run inside the Pod itself. Usually you'll just need one. 
       containers:
-        # set a name for the container, which will be visible in the
-        # CLI/web interface
-      - name: tpproject-container  
-        image: somaf/tpproject:baseline-cluster
-        # the container will run the secondjob.py script from your external filespace 
+      - name: tpproject-training  
+        image: somaf/tp-project:baseline-test-5
         command: 
           - "python"
-          - "/nfs/secondjob.py"
+        args:
+          - "runner.py"
+          - "--config"
+          - "baseline"
+          - "--data-path"
+          - "/nfs/data"
+          - "--checkpoint"
+          - "/nfs/checkpoints"
         resources:
           requests:
             # the "m" suffix here means "millicores", so 1 physical CPU
             # core = 1000m. this container requests 2000m = 2 physical cores
-            cpu: "2000m" 
+            cpu: "1000m" 
             # memory units are also defined by a suffix. typically this will
             # be "Mi" or "Gi" as appropriate
-            memory: "4Gi"
+            memory: "8Gi"
             # GPUs are slightly different as they're not natively supported
             # by Kubernetes. This indicates that the container requires 1 
             # GPU in order to run
@@ -45,17 +39,14 @@ spec:
           limits:
             cpu: "4000m" 
             memory: "8Gi"
-            nvidia.com/gpu: 1 
+            nvidia.com/gpu: 1
+        workingDir: /app
         volumeMounts:
         - mountPath: /nfs
           name: nfs-access
-        # example of defining an environment variable and its value, so that they
-        # will be visible inside this container
-        # env:
-        # - name: SOME_ENV_VAR
-        #   value: "env var value"
-      # this defines a volume called nfs-access which corresponds to your cluster
-      # filespace. 
+        env:
+        - name: NUMBA_CACHE_DIR
+          value: /tmp 
       volumes:
       - name: nfs-access
         persistentVolumeClaim:

@@ -30,19 +30,19 @@ class Reporter():
                 b) report on model to generate confusion matrices and accuracies
                     # train_num_correct, test_num_correct = reporter.report_on_model()
     """
-    def __init__(self, name, max_epochs):
+    def __init__(self, name, max_epochs, save_directory):
         if name not in possible_names:
             raise ValueError('name is not recognized from possible experiment names')
         
-        my_path = os.path.join(os.getcwd(), 'data', 'reports', name)
+        # my_path = os.path.join(os.getcwd(), 'data', 'reports', name)
 
-        if os.path.exists(my_path):
-            for root, dirs, files in os.walk(my_path):
-                for file in files:
-                    os.remove(os.path.join(root, file))
+        # if os.path.exists(my_path):
+        #     for root, dirs, files in os.walk(my_path):
+        #         for file in files:
+        #             os.remove(os.path.join(root, file))
 
         self.name = name
-        self.log_path = 'data/reports/' + name + '/train'
+        self.log_path = save_directory
         self.max_epochs = max_epochs
 
         self.train_confusion_matrix = None
@@ -86,6 +86,7 @@ class Reporter():
     
     def record_first_batch(self, model, train_set_len, first_item):
         print('recording first batch data')
+
         with torch.no_grad():
             first_item = first_item.unsqueeze(0)
             self.train_set_len = train_set_len
@@ -111,5 +112,11 @@ class Reporter():
             print('report is available through tensorboard in the reports folder')
             self.train_summary_writer.close()
     # TODO
-    def keep_log(log_string):
+    def keep_log(self, log_string):
         print(log_string)
+    def __str__(self):
+        return str(dict(
+            name = self.name,
+            log_path = self.log_path
+        ))
+        

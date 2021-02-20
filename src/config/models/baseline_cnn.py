@@ -5,10 +5,10 @@ import torch.nn as nn
 class BaselineCNN(nn.Module):
     def __init__(self):
         super(BaselineCNN, self).__init__()
-        self.conv1 = nn.Conv2d(1, 64, kernel_size=5, stride=(1, 3))
-        self.conv2 = nn.Conv2d(64, 32, kernel_size=5, stride=2)
+        self.conv1 = nn.Conv2d(1, 64, kernel_size=5, stride=2, padding=2)
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=5, stride=2, padding=2)
 
-        self.fc1 = nn.Linear(32*14*96, 10)
+        self.fc1 = nn.Linear(64*8*28, 10)
         self.pool = F.max_pool2d
 
         

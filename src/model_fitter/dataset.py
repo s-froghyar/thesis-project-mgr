@@ -1,12 +1,9 @@
-import seaborn as sns
 import os
 import glob
 import pandas as pd
 import numpy as np
 import librosa
 import librosa.display
-from tqdm import tqdm
-import matplotlib.pyplot as plt
 
 import torch
 from torch.utils.data import Dataset
@@ -51,7 +48,7 @@ class GtzanWave:
                                                                 df['label'],
                                                                 test_size=test_size)
         self.prep_test_values()
-        self.init_dataframe(init_x, init_y, aug_params)
+        self.init_dataframe(init_x, init_y)
         self.give_report()
     
     def __len__(self):
@@ -71,14 +68,13 @@ class GtzanWave:
                                                mono  = True,
                                                dtype = np.float32)
             
-            new_test_x.append(get_correct_input_format(wave_data, self.aug_params["segmented"]))
+            new_test_x.append(get_correct_input_format(wave_data, self.aug_params.segmented))
             new_test_y.append(genre_mapping[str(self.test_y[index])])
             
         self.test_x = np.array(new_test_x)
         self.test_y = np.array(new_test_y)
 
     def init_dataframe(self, init_x, init_y):
-
         noise_injection = self.aug_params.noise_injection
         pitch_shift = self.aug_params.pitch_shift
         
@@ -90,11 +86,11 @@ class GtzanWave:
         PITCH_SHIFT_STEPS = ((pitch_shift[1] - pitch_shift[0]) / pitch_shift[2])
         NUM_OF_AUGMENTED_DATA = (len(self.train_x)) * (NOISE_INJECTION_STEPS + PITCH_SHIFT_STEPS)
         
-        for index, filePath in tqdm(init_x.iteritems()):
+        for index, filePath in init_x.iteritems():
             wave_data, sample_rate = librosa.core.load(filePath, 
-                                               sr    = BASE_SAMPLE_RATE,
-                                               mono  = True,
-                                               dtype = np.float32)
+                                            sr    = BASE_SAMPLE_RATE,
+                                            mono  = True,
+                                            dtype = np.float32)
             self.create_noise_injected_data(wave_data,
                                         sample_rate,
                                         noise_injection,
@@ -114,7 +110,7 @@ class GtzanWave:
             noise = np.random.randn(len(wd))
             augmented_data = wd + noise_factor * noise
 
-            self.train_x.append(get_correct_input_format(augmented_data, self.aug_params["segmented"]))
+            self.train_x.append(get_correct_input_format(augmented_data, self.aug_params.segmented))
             self.train_y.append(label)
     
     def create_pitch_shifted_data(self, wd, sr, ps, label):
@@ -123,7 +119,7 @@ class GtzanWave:
             
             augmented_data = librosa.effects.pitch_shift(wd, sr, pitch_factor)
             
-            self.train_x.append(get_correct_input_format(augmented_data, self.aug_params["segmented"]))
+            self.train_x.append(get_correct_input_format(augmented_data, self.aug_params.segmented))
             self.train_y.append(label)
             
     def set_up_buckets(self, init_x, init_y):
@@ -136,10 +132,10 @@ class GtzanWave:
 
         for index, row in init_x.iteritems():
             wave_data, sample_rate = librosa.core.load(row, 
-                                               sr    = BASE_SAMPLE_RATE,
-                                               mono  = True,
-                                               dtype = np.float32)
-            self.train_x.append(get_correct_input_format(wave_data, self.aug_params["segmented"]))
+                                            sr    = BASE_SAMPLE_RATE,
+                                            mono  = True,
+                                            dtype = np.float32)
+            self.train_x.append(get_correct_input_format(wave_data, self.aug_params.segmented))
             self.train_y.append(genre_mapping[str(init_y[index])])         
             
     def give_report(self):

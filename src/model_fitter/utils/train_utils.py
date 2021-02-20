@@ -9,12 +9,12 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
     #     preds = model(strip_data)
     #     preds_sum += preds
     model.train()
+
     reporter.reset_epoch_data()
     for batch_idx, (data, targets) in enumerate(loader):
-        predictions = get_model_prediction(config.aug_params["segmented"])
+        predictions = get_model_prediction(model, data, targets, device, config.aug_params.segmented)
         
         loss = get_model_loss(predictions, targets, config, device)
-        
         reporter.record_batch_data(predictions, targets, loss)
 
         # backward
@@ -23,11 +23,11 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
 
         # gradient descent or adam step
         optimizer.step()
-        if batch_idx % config.log_interval == 0:
-            reporter.keep_log(
-                'Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\t'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), training_loss.item())
+        # if batch_idx % config.log_interval == 0:
+        reporter.keep_log(
+            'Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\t'.format(
+            epoch, batch_idx * len(data), len(loader.dataset),
+            100. * batch_idx / len(loader), loss.item())
             )
     reporter.record_epoch_data(model, epoch)
 
@@ -36,6 +36,7 @@ def test_model(model, device, loader):
     
 
 def get_model_prediction(model, data, targets, device, is_segmented):
+    preds_sum = None
     if is_segmented:
         preds_sum = torch.from_numpy(np.zeros((data.shape[0], 10)))
         for i in range(6):
@@ -44,6 +45,9 @@ def get_model_prediction(model, data, targets, device, is_segmented):
             targets = targets.to(device=device)
             preds = model(strip_data)
             preds_sum += preds
+    else:
+        preds_sum = model(data)
+    return preds_sum
 
 
 # TODO

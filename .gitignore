@@ -1,8 +1,9 @@
 .ipynb_checkpoints/
 **/gtzan_test
-GTZAN/
+data/
 __pycache__
 .vscode/
 reports/
 build/
 in_dev/
+checkpoints/

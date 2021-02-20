@@ -1,6 +1,8 @@
 from .dataset import *
 from .utils import *
 import time
+from torch.utils.data import DataLoader
+
 
 class ModelFitter:
     def __init__(self, args, model_config, device, kwargs, reporter):
@@ -13,8 +15,9 @@ class ModelFitter:
     def fit(self):
 
         model, optimizer = self.init_model()
-        train_loader, test_loader = self.get_data_loaders()
-
+        train_loader, train_dataset, test_loader, test_dataset = self.get_data_loaders()
+        self.reporter.record_first_batch(model, len(train_loader), next(iter(train_loader))[0][0])
+        
         for epoch in range(self.model_config.epochs):
             train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
         
@@ -34,7 +37,7 @@ class ModelFitter:
         test_dataset = GtzanDataset(GTZAN.test_x, GTZAN.test_y, self.model_config.dataset_params, train=False)
         test_loader = DataLoader(dataset=test_dataset, batch_size=self.model_config.batch_size, shuffle=True)
 
-        return train_loader, test_loader
+        return train_loader, train_dataset, test_loader, test_dataset
 
     def init_model(self):
         out_model = self.model_config.model().to(self.device)

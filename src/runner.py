@@ -21,7 +21,6 @@ parser.add_argument('--checkpoint', default='checkpoints', help='the path to sav
 parser.add_argument('--crossval', action='store_true', help='Enable crossvalidation')
 parser.add_argument('--test-only', default=False, action='store_true', help='Load the saved models from a training round and perform evaluation')
 
-
 def main():
     args = parser.parse_args()
     config_name = args.config
@@ -42,7 +41,7 @@ def main():
 
     print(f'Save directory: {save_directory}')
 
-    reporter = Reporter
+    reporter = Reporter(config_name, config.epochs, save_directory)
 
     model_fitter = ModelFitter(args, config, device, kwargs, reporter)
 
