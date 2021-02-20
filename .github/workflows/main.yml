@@ -9,6 +9,11 @@ jobs:
     name: Build and publish
     runs-on: ubuntu-latest
     steps:
+      - name: Preparation
+        id: prep
+        run: |
+          TAGS="somaf/tp-project:${{ github.sha }}"
+          echo ::set-output name=tags::${TAGS}
       - name: Login to DockerHub
         uses: docker/login-action@v1 
         with:
@@ -19,7 +24,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tag: train
+          tags: ${{ steps.prep.outputs.tags }}
           dockerfile: ./app/Dockerfile
           registry: docker.pkg.github.com
           repository: myrepo/myimg
