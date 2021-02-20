@@ -19,7 +19,9 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          dockerfile: ./src/Dockerfile
-          repository: somaf/tp-project
+          tag: train
+          dockerfile: ./app/Dockerfile
+          registry: docker.pkg.github.com
+          repository: myrepo/myimg
           tag_with_ref: true
       
