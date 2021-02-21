@@ -9,22 +9,38 @@ jobs:
     name: Build and publish
     runs-on: ubuntu-latest
     steps:
-      - name: Preparation
-        id: prep
-        run: |
-          TAGS="train-${{ github.sha }}"
-          echo ::set-output name=tags::${TAGS}
+      # - name: Preparation
+      #   id: prep
+      #   run: |
+      #     TAGS="train-${{ github.sha }}"
+      #     echo ::set-output name=tags::${TAGS}
       # - name: Login to DockerHub
       #   uses: docker/login-action@v1 
       #   with:
       #     username: ${{ secrets.DOCKER_USERNAME }}
       #     password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v1.1.0
+      # - name: Build and push
+      #   id: docker_build
+      #   uses: docker/build-push-action@v1.1.0
+      #   with:
+      #     username: ${{ secrets.DOCKER_USERNAME }}
+      #     password: ${{ secrets.DOCKER_PASSWORD }}
+      #     repository: somaf/tp-project
+      #     tags: ${{ steps.prep.outputs.tags }}
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: somaf/tp-project
-          tags: ${{ steps.prep.outputs.tags }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: somaf/tp-project:train-${{ github.sha }}
       
