@@ -74,15 +74,15 @@ class Reporter():
         return (train_num_correct, test_num_correct)
                                     
     
-    def show_confusion_matrix(self, train=True):
-        if self.confusion_matrix is not None:
-            if train:
-                plot_confusion_matrix(self.train_confusion_matrix)
-            else:
-                plot_confusion_matrix(self.test_confusion_matrix)
-        else:
-            raise ValueError(
-                'confusion matrix is not generated yet, please run Reporter.report_on_model() to generate it.')
+    # def show_confusion_matrix(self, train=True):
+    #     if self.confusion_matrix is not None:
+    #         if train:
+    #             plot_confusion_matrix(self.train_confusion_matrix)
+    #         else:
+    #             plot_confusion_matrix(self.test_confusion_matrix)
+    #     else:
+    #         raise ValueError(
+    #             'confusion matrix is not generated yet, please run Reporter.report_on_model() to generate it.')
     
     def record_first_batch(self, model, train_set_len, first_item):
         print('recording first batch data')
