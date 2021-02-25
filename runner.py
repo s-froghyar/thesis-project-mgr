@@ -8,7 +8,7 @@ from datetime import date
 model_configs = {
     'baseline': BaselineCNNconfig,
     'segmented': SegmentedCNNconfig,
-    'tp-cnn': TpCNNconfig,
+    'tp': TpCNNconfig,
     'augerino': AugerinoCNNconfig,
 }
 

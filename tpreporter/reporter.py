@@ -4,8 +4,9 @@ from torch.utils.tensorboard import SummaryWriter
 import torchvision
 from sklearn.metrics import confusion_matrix
 from .reporter_utils import *
+import datetime
 
-possible_names = ['baseline', 'segmented']
+possible_names = ['baseline', 'segmented', 'tp']
 
 class Reporter():
     """
@@ -34,20 +35,21 @@ class Reporter():
         if name not in possible_names:
             raise ValueError('name is not recognized from possible experiment names')
         
-        # my_path = os.path.join(os.getcwd(), 'data', 'reports', name)
-
-        # if os.path.exists(my_path):
-        #     for root, dirs, files in os.walk(my_path):
-        #         for file in files:
-        #             os.remove(os.path.join(root, file))
-
         self.name = name
         self.log_path = save_directory
         self.max_epochs = max_epochs
 
         self.train_confusion_matrix = None
         self.test_confusion_matrix = None
-        self.train_summary_writer = SummaryWriter(self.log_path)
+        self.create_logging_env()
+        self.train_summary_writer = SummaryWriter(f"{self.log_path}/tensorboard")
+        self.keep_log(
+            f'''
+            Reporter started with params:
+            name: {self.name}
+            log_path: {self.log_path}
+            '''
+        )
 
     def set_post_training_values(self, model, train_set, test_set):
         self.model = model
@@ -72,17 +74,6 @@ class Reporter():
                                     self.test_predictions.argmax(dim=1))
         
         return (train_num_correct, test_num_correct)
-                                    
-    
-    # def show_confusion_matrix(self, train=True):
-    #     if self.confusion_matrix is not None:
-    #         if train:
-    #             plot_confusion_matrix(self.train_confusion_matrix)
-    #         else:
-    #             plot_confusion_matrix(self.test_confusion_matrix)
-    #     else:
-    #         raise ValueError(
-    #             'confusion matrix is not generated yet, please run Reporter.report_on_model() to generate it.')
     
     def record_first_batch(self, model, train_set_len, first_item):
         print('recording first batch data')
@@ -111,12 +102,19 @@ class Reporter():
         if (epoch-1) == self.max_epochs:
             print('report is available through tensorboard in the reports folder')
             self.train_summary_writer.close()
-    # TODO
     def keep_log(self, log_string):
-        print(log_string)
+        log_text = f"\n{str(datetime.datetime.now())}: {log_string}"
+        with open(f"{self.log_path}/logs", 'a') as f:
+            f.write(log_text)
+            print(log_text)
+
+    def create_logging_env(self):
+        full_data_path = os.path.join(os.getcwd(), self.log_path)
+        dir_content = os.listdir(full_data_path)
+        self.log_path = f"{self.log_path}/run_{len(dir_content) + 1}"
+
     def __str__(self):
         return str(dict(
             name = self.name,
             log_path = self.log_path
         ))
-        

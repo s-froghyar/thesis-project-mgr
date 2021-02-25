@@ -13,7 +13,6 @@ class ModelFitter:
         self.reporter = reporter
 
     def fit(self):
-
         model, optimizer = self.init_model()
         train_loader, train_dataset, test_loader, test_dataset = self.get_data_loaders()
         self.reporter.record_first_batch(model, len(train_loader), next(iter(train_loader))[0][0])

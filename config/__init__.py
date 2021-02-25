@@ -31,10 +31,9 @@ class CNNconfig:
     )
 
     optimizer = optim.Adam
-    propagate_tangent = False
+    is_tangent_prop = False
     test_transform = None
     test_e0 = 0
-    audio_transform = None
 
 class BaselineCNNconfig(CNNconfig):
     model = BaselineCNN
@@ -47,6 +46,8 @@ class SegmentedCNNconfig(CNNconfig):
 class TpCNNconfig(CNNconfig):
     model = TpCNN
     aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1), True )
+    is_tangent_prop = True
+    e0 = 1e-3
 
 class AugerinoCNNconfig(CNNconfig):
     model = AugerinoCNN
