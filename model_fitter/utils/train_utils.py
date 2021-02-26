@@ -48,7 +48,6 @@ def get_model_prediction(model, data, targets, device, is_segmented):
 
 def get_model_loss(predictions, targets, config, device, x=None, transformed_data=None):
     tp_loss = 0
-    
     if x is not None and transformed_data is not None:
         tp_loss = get_tp_loss(x, predictions, config.e0, device, transformed_data)
     

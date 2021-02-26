@@ -22,6 +22,7 @@ class CNNconfig:
     log_interval = 30
     save_model = True
     loss = torch.nn.CrossEntropyLoss()
+    pre_augment = True
 
     dataset_params = dict(
         frames=128,
@@ -33,7 +34,6 @@ class CNNconfig:
     optimizer = optim.Adam
     is_tangent_prop = False
     test_transform = None
-    test_e0 = 0
 
 class BaselineCNNconfig(CNNconfig):
     model = BaselineCNN
@@ -45,7 +45,8 @@ class SegmentedCNNconfig(CNNconfig):
 
 class TpCNNconfig(CNNconfig):
     model = TpCNN
-    aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1), True )
+    pre_augment = False
+    # aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1), True )
     is_tangent_prop = True
     e0 = 1e-3
 
