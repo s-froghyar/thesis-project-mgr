@@ -4,6 +4,9 @@ import torchaudio
 import torchaudio.transforms as aud_transforms
 from sklearn.model_selection import train_test_split
 
+from .dataset_utils import BASE_SAMPLE_RATE
+from .transformations import apply_audio_transformations
+
 torchaudio.set_audio_backend("sox_io")
 
 class GtzanDynamicDataset(Dataset):
@@ -15,13 +18,13 @@ class GtzanDynamicDataset(Dataset):
             - window_size
             - hop_size
     '''
-    def __init__(self, X, y, dataset_params, e0, device, train=False):
+    def __init__(self, X, y, dataset_params, device, train=False):
         self.X = X
         self.targets = y
 
         self.device = device
         self.dataset_params = dataset_params
-        self.e0 = e0
+        self.e0 = dataset_params["e0"]
         
         self.mel_spec_transform = aud_transforms.MelSpectrogram(
             sample_rate=BASE_SAMPLE_RATE,
@@ -32,7 +35,7 @@ class GtzanDynamicDataset(Dataset):
         self.train = train
     def __getitem__(self, index):
         transformed_spectrogram = self.transform(
-            apply_audio_transformations(self.X[index])
+            apply_audio_transformations(self.X[index], self.e0)
         )
         return (
             self.transform(self.X[index]),
@@ -42,5 +45,5 @@ class GtzanDynamicDataset(Dataset):
     def __len__(self):
         return len(self.X)
     def transform(self, x):
-        x = torch.from_numpy(x).to(self.device)
+        x = torch.from_numpy(x).to(torch.float32)
         return self.mel_spec_transform(x)

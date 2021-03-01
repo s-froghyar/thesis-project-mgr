@@ -9,7 +9,7 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
         if config.is_tangent_prop:
             data.requires_grad = True
 
-        predictions = get_model_prediction(model, data, targets, device, config.aug_params.segmented)
+        predictions = get_model_prediction(model, data, targets, device, config.segmented)
         
         loss, tp_loss = get_model_loss(predictions, targets, config, device)
         reporter.record_batch_data(predictions, targets, loss)

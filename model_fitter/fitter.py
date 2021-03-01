@@ -11,9 +11,10 @@ class ModelFitter:
         self.kwargs = kwargs
         self.reporter = reporter
 
-    def fit(self):
+    def fit(self): 
         model, optimizer = self.init_model()
-        train_loader, test_loader = self.get_data_loaders()
+        train_loader, test_loader, data_count, metadata = self.get_data_loaders()
+        print(str(metadata))
         self.reporter.record_first_batch(model, len(train_loader), next(iter(train_loader))[0][0])
         
         for epoch in range(self.model_config.epochs):
@@ -26,55 +27,39 @@ class ModelFitter:
 
     def get_data_loaders(self):
         print("Loading in data...")
+        dataset = None
         if self.model_config.pre_augment:
-            GTZAN = load_wave_data(
-                self.args.data_path,
-                aug_params=self.model_config.aug_params,
-                is_pre_augmented=True
-                self.args.local)
-
-            train_loader = DataLoader(
-                GtzanPreAugmentedDataset(
-                    GTZAN.train_x,
-                    GTZAN.train_y,
-                    self.model_config.dataset_params,
-                    train=True), 
-                batch_size=self.model_config.batch_size)
-
-            test_loader = DataLoader(
-                GtzanPreAugmentedDataset(
-                    GTZAN.test_x,
-                    GTZAN.test_y,
-                    self.model_config.dataset_params,
-                    train=False),
-                batch_size=self.model_config.batch_size, shuffle=True)
-
-            return train_loader, test_loader
+            dataset = GtzanPreAugmentedDataset
+            aug_params = self.model_config.aug_params
         else:
-            GTZAN = load_wave_data(
-                self.args.data_path,
-                aug_params=self.model_config.aug_params,
-                is_pre_augmented=False
-                self.args.local)
-            train_loader = DataLoader(
-                GtzanDynamicDataset(
-                    GTZAN.train_x,
-                    GTZAN.train_y,
-                    self.model_config.dataset_params,
-                    self.model_config.e0,
-                    self.device
-                )
-            )
-            test_loader = DataLoader(
-                GtzanDynamicDataset(
-                    GTZAN.test_x,
-                    GTZAN.test_y,
-                    self.model_config.dataset_params,
-                    self.model_config.e0,
-                    self.device
-                )
-            )
-            return train_loader, test_loader
+            dataset = GtzanDynamicDataset
+            aug_params = None
+        
+        GTZAN, data_count = load_wave_data(
+            self.args.data_path,
+            aug_params=aug_params,
+            segmented=self.model_config.segmented,
+            is_pre_augmented=self.model_config.pre_augment,
+            is_local=self.args.local)
+
+        train_loader = DataLoader(
+            dataset(
+                GTZAN.train_x,
+                GTZAN.train_y,
+                self.model_config.dataset_params,
+                self.device,
+                train=True), 
+            batch_size=self.model_config.batch_size)
+
+        test_loader = DataLoader(
+            dataset(
+                GTZAN.test_x,
+                GTZAN.test_y,
+                self.model_config.dataset_params,
+                self.device,
+                train=False),
+            batch_size=self.model_config.batch_size, shuffle=True)
+        return train_loader, test_loader, data_count, GTZAN.get_metadata()
 
     def init_model(self):
         out_model = self.model_config.model().to(self.device)

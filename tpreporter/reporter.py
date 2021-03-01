@@ -92,9 +92,12 @@ class Reporter():
 
     def create_logging_env(self):
         full_data_path = os.path.join(os.getcwd(), self.log_path)
-        dir_content = os.listdir(full_data_path)
-        self.log_path = f"{self.log_path}/run_{len(dir_content) + 1}"
-
+        try:
+            dir_content = os.listdir(full_data_path)
+            self.log_path = f"{self.log_path}/run_{len(dir_content) + 1}"
+        except FileNotFoundError:
+            os.mkdir(full_data_path)
+            self.log_path = f"{self.log_path}/run_1"
     def __str__(self):
         return str(dict(
             name = self.name,

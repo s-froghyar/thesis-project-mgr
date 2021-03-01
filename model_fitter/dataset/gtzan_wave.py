@@ -1,7 +1,11 @@
+import os
 import numpy as np
 import librosa
 import librosa.display
-from .dataset_utils import BASE_SAMPLE_RATE, genre_mapping, get_correct_input_format
+from sklearn.model_selection import train_test_split
+import pickle
+
+from .dataset_utils import BASE_SAMPLE_RATE, genre_mapping, get_correct_input_format, get_data_frame
 
 class GtzanWave:
     """
@@ -16,11 +20,15 @@ class GtzanWave:
         df,
         pre_augment=False,
         aug_params=None,
+        segmented=False,
         test_size=0.1,
     ):
         if pre_augment:
             self.aug_params = aug_params
-            
+
+        self.pre_augment = pre_augment
+        self.segmented = segmented  
+        
         init_x, self.test_x, init_y, self.test_y = train_test_split(df['filePath'],
                                                                 df['label'],
                                                                 test_size=test_size)
@@ -45,7 +53,7 @@ class GtzanWave:
                                                mono  = True,
                                                dtype = np.float32)
             
-            new_test_x.append(get_correct_input_format(wave_data, self.aug_params.segmented))
+            new_test_x.append(get_correct_input_format(wave_data, self.segmented))
             new_test_y.append(genre_mapping[str(self.test_y[index])])
             
         self.test_x = np.array(new_test_x)
@@ -53,7 +61,8 @@ class GtzanWave:
 
     def init_dataframe(self, init_x, init_y):
         self.set_up_buckets(init_x, init_y)
-        self.augment_data(init_x, init_y)
+        if self.pre_augment:
+            self.augment_data(init_x, init_y)
         
         self.train_x = np.array(self.train_x)
         self.train_y = np.array(self.train_y)
@@ -88,7 +97,7 @@ class GtzanWave:
             noise = np.random.randn(len(wd))
             augmented_data = wd + noise_factor * noise
 
-            self.train_x.append(get_correct_input_format(augmented_data, self.aug_params.segmented))
+            self.train_x.append(get_correct_input_format(augmented_data, self.segmented))
             self.train_y.append(label)
     
     def create_pitch_shifted_data(self, wd, sr, ps, label):
@@ -97,7 +106,7 @@ class GtzanWave:
             
             augmented_data = librosa.effects.pitch_shift(wd, sr, pitch_factor)
             
-            self.train_x.append(get_correct_input_format(augmented_data, self.aug_params.segmented))
+            self.train_x.append(get_correct_input_format(augmented_data, self.segmented))
             self.train_y.append(label)
             
     def set_up_buckets(self, init_x, init_y):
@@ -113,7 +122,7 @@ class GtzanWave:
                                             sr    = BASE_SAMPLE_RATE,
                                             mono  = True,
                                             dtype = np.float32)
-            self.train_x.append(get_correct_input_format(wave_data, self.aug_params.segmented))
+            self.train_x.append(get_correct_input_format(wave_data, self.segmented))
             self.train_y.append(genre_mapping[str(init_y[index])])         
             
     def give_report(self):
@@ -129,4 +138,48 @@ class GtzanWave:
 
                 return f"not the same shape as base_shape of {base_shape}"
         return f"the same shape, that is {base_shape}"
+    def get_metadata(self):
+        return dict(
+            num_of_train_data=len(self.train_x),
+            num_of_test_data=len(self.test_x),
+            first_item=self.train_x[0]
+        )
 
+def load_wave_data(data_path, aug_params=None, segmented=False, is_pre_augmented=True, is_local=True):
+    '''
+        Returns tuple of (GtzanWave object, number of audio files, first_wave tuple=())
+    '''
+    test_file_path = ""
+    num_of_data = 0
+    gtzan_waves = None
+
+    # select file path in case it's local
+    if is_pre_augmented:
+        test_file_path = f"{data_path}/gtzan_augmented_test"
+    else:
+        test_file_path = f"{data_path}/gtzan_dynamic_test"
+    
+    test_file_exists = os.path.isfile(test_file_path)
+    
+    if is_local:
+        df, num_of_data = get_data_frame(data_path, True)
+
+        if test_file_exists:
+            gtzan_waves = load_test_data(test_file_path)
+        else:
+            gtzan_waves = GtzanWave(df, pre_augment=is_pre_augmented, segmented=segmented, aug_params=aug_params)
+            save_test_data(test_file_path, gtzan_waves)
+    else:
+        df, num_of_data = get_data_frame(data_path, False)
+        print("Preparing %i waves %s pre-augmentation" % (num_of_data, "with" if is_pre_augmented else "without"))
+        gtzan_waves = GtzanWave(df, pre_augment=is_pre_augmented, segmented=segmented, aug_params=aug_params)
+    
+    return gtzan_waves, num_of_data
+
+
+def save_test_data(test_file_path, data):
+    with open(test_file_path, 'wb') as f:
+        pickle.dump(data, f)
+def load_test_data(test_file_path):
+    with open(test_file_path, 'rb') as f:
+        return pickle.load(f)

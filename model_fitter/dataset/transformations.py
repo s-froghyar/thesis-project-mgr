@@ -15,7 +15,7 @@ def gaussian_noise_injection(x, snr):
     snr_linear = 10**(snr / 10.0)
     noise_factor = (sig_power / noise_power) * (1 / snr_linear)
 
-    return sig + np.sqrt(noise_factor) * g_noise
+    return x + np.sqrt(noise_factor) * g_noise
 
 def pitch_shift(x, factor):
-    return librosa.effects.pitch_shift(wd, BASE_SAMPLE_RATE, (1 + factor))
+    return librosa.effects.pitch_shift(x, BASE_SAMPLE_RATE, (1 + factor))

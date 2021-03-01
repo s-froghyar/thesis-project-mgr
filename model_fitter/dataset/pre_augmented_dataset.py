@@ -3,12 +3,11 @@ import torch
 from torch.utils.data import Dataset
 import torchaudio
 import torchaudio.transforms as aud_transforms
-from sklearn.model_selection import train_test_split
 
 torchaudio.set_audio_backend("sox_io")
 
 class GtzanPreAugmentedDataset(Dataset):
-    def __init__(self, X, y, dataset_params, train=False):
+    def __init__(self, X, y, dataset_params, device, train=False):
         self.X = X
         self.targets = y
         self.dataset_params = dataset_params

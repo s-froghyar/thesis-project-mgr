@@ -3,15 +3,13 @@ import torch
 import torch.optim as optim
 
 class AugmentationParameters:
-    def __init__(self, ni, ps, is_segmented):
+    def __init__(self, ni, ps):
         self.noise_injection = ni
         self.pitch_shift = ps
-        self.segmented = is_segmented
     def __str__(self):
         return str(dict(
             noise_injection = self.noise_injection,
-            pitch_shift = self.pitch_shift,
-            segmented = self.segmented
+            pitch_shift = self.pitch_shift
         ))
 class CNNconfig:
     batch_size = 64
@@ -23,6 +21,7 @@ class CNNconfig:
     save_model = True
     loss = torch.nn.CrossEntropyLoss()
     pre_augment = True
+    segmented = False
 
     dataset_params = dict(
         frames=128,
@@ -37,20 +36,28 @@ class CNNconfig:
 
 class BaselineCNNconfig(CNNconfig):
     model = BaselineCNN
-    aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1), False )
+    aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1) )
 
 class SegmentedCNNconfig(CNNconfig):
     model = SegmentedCNN
-    aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1), True )
+    aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1) )
+    segmented = True
 
 class TpCNNconfig(CNNconfig):
     model = TpCNN
     pre_augment = False
-    # aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1), True )
+    segmented = False
     is_tangent_prop = True
-    e0 = 1e-3
+    dataset_params = dict(
+        frames=128,
+        bands=128,
+        window_size=1024,
+        hop_size=1024,
+        e0=1e-3
+    )
 
 class AugerinoCNNconfig(CNNconfig):
     model = AugerinoCNN
-    aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1), True )
+    segmented = True
+    aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1) )
 

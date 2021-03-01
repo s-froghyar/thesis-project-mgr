@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import pickle
 import copy
-from .gtzan_wave import GtzanWave
 
 
 BASE_SAMPLE_RATE = 16000
@@ -19,29 +18,6 @@ genre_mapping = {
     'reggae': 8,
     'rock': 9
 }
-
-def load_wave_data(data_path, aug_params=None, is_pre_augmented=True, is_local=True):
-    test_file_path = ""
-    if is_pre_augmented:
-        test_file_path = f"{data_path}/gtzan_augmented_test"
-    else:
-        test_file_path = f"{data_path}/gtzan_dynamic_test"
-    
-    test_file_exists = os.path.isfile(test_file_path)
-    
-    if is_local:
-        if test_file_exists:
-            with open(test_file_path, 'rb') as f:
-                return pickle.load(f)
-        else:
-            df = get_data_frame(data_path, True)
-            temp = GtzanWave(df, pre_augment=is_pre_augmented, aug_params=aug_params)
-            with open(test_file_path, 'wb') as f:
-                pickle.dump(temp, f)
-            return temp
-    else:
-        df = get_data_frame(data_path, False)
-        return GtzanWave(df, pre_augment=is_pre_augmented, aug_params=aug_params)
 
 def get_data_frame(data_path, is_local):
     temp_df = None
@@ -59,7 +35,7 @@ def get_data_frame(data_path, is_local):
         ids[index] = f"id-{bits[0][0:2]}{bits[1]}-original"
     temp_df['ID'] = ids
 
-    return temp_df.loc[:, ['ID','filePath', 'label']]
+    return temp_df.loc[:, ['ID','filePath', 'label']], len(temp_df)
 
 def get_correct_input_format(wave_data, is_segmented):
     if is_segmented:
