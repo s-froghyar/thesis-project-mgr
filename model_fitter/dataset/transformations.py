@@ -1,4 +1,3 @@
-from pydiogment.auga import add_noise
 from .dataset_utils import BASE_SAMPLE_RATE
 import librosa
 import numpy as np
