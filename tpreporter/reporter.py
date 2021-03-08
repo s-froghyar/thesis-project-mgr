@@ -4,9 +4,10 @@ from torch.utils.tensorboard import SummaryWriter
 import torchvision
 from sklearn.metrics import confusion_matrix
 from .reporter_utils import *
+import numpy as np
 import datetime
 
-possible_names = ['baseline', 'segmented', 'tp']
+possible_names = ['baseline', 'segmented', 'tp', 'augerino']
 
 class Reporter():
     """
@@ -59,11 +60,11 @@ class Reporter():
     
     def record_first_batch(self, model, train_set_len, first_item):
         print('recording first batch data')
-
+        
         with torch.no_grad():
             first_item = first_item.unsqueeze(0)
-            self.train_set_len = train_set_len
             self.train_summary_writer.add_image('images', first_item)
+            self.train_set_len = train_set_len
             self.train_summary_writer.add_graph(model, first_item)
     def reset_epoch_data(self):
         self.total_loss = 0

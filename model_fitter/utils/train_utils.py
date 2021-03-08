@@ -1,15 +1,17 @@
 from torch import nn
+import numpy as np
+import torch
 from .tp import get_tp_loss
 
 def train_model(model, config, reporter, device, loader, optimizer, epoch):
     model.train()
 
     reporter.reset_epoch_data()
-    for batch_idx, (data, targets) in enumerate(loader):
+    for batch_idx, (data, transformed_data, targets) in enumerate(loader):
         if config.is_tangent_prop:
             data.requires_grad = True
 
-        predictions = get_model_prediction(model, data, targets, device, config.segmented)
+        predictions = get_model_prediction(model, data, targets, device, config)
         
         loss, tp_loss = get_model_loss(predictions, targets, config, device)
         reporter.record_batch_data(predictions, targets, loss)
@@ -32,8 +34,9 @@ def test_model(model, device, loader):
     model.eval()
     
 
-def get_model_prediction(model, data, targets, device, is_segmented):
+def get_model_prediction(model, data, targets, device, config):
     preds_sum = None
+    is_segmented = config.segmented and not config.augerino
     if is_segmented:
         preds_sum = torch.from_numpy(np.zeros((data.shape[0], 10)))
         for i in range(6):
@@ -41,9 +44,9 @@ def get_model_prediction(model, data, targets, device, is_segmented):
             targets = targets.to(device=device)
             preds = model(strip_data)
             preds_sum += preds
+        return preds_sum
     else:
-        preds_sum = model(data)
-    return preds_sum
+        return model(data.double())
 
 
 def get_model_loss(predictions, targets, config, device, x=None, transformed_data=None):

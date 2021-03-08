@@ -33,6 +33,7 @@ class CNNconfig:
     optimizer = optim.Adam
     is_tangent_prop = False
     test_transform = None
+    augerino = False
 
 class BaselineCNNconfig(CNNconfig):
     model = BaselineCNN
@@ -60,4 +61,7 @@ class AugerinoCNNconfig(CNNconfig):
     model = AugerinoCNN
     segmented = True
     aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1) )
+    is_tangent_prop = False
+    pre_augment = False
+    augerino = True
 

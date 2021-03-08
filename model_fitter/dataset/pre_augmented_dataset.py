@@ -3,11 +3,11 @@ import torch
 from torch.utils.data import Dataset
 import torchaudio
 import torchaudio.transforms as aud_transforms
-
+from .dataset_utils import *
 torchaudio.set_audio_backend("sox_io")
 
 class GtzanPreAugmentedDataset(Dataset):
-    def __init__(self, X, y, dataset_params, device, train=False):
+    def __init__(self, X, y, dataset_params, device, train=False, augerino=False):
         self.X = X
         self.targets = y
         self.dataset_params = dataset_params
@@ -19,7 +19,10 @@ class GtzanPreAugmentedDataset(Dataset):
         )
         self.train = train
     def __getitem__(self, index):
-        return (self.transform(self.X[index]), self.targets[index]) 
+        return (
+            self.transform(self.X[index]),
+            self.transform(self.X[index]),
+            self.targets[index]) 
     def __len__(self):
         return len(self.X)
     def transform(self, x):
