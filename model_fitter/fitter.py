@@ -13,13 +13,23 @@ class ModelFitter:
         self.kwargs = kwargs
         self.reporter = reporter
 
+        dataset_params = self.model_config.dataset_params
+        self.spectrogram_transform = aud_transforms.MelSpectrogram(
+                sample_rate=BASE_SAMPLE_RATE,
+                n_mels=dataset_params["bands"],
+                n_fft=dataset_params["window_size"],
+                hop_length=dataset_params["hop_size"]
+            )
+
+
     def fit(self): 
         model, optimizer = self.init_model()
         train_loader, test_loader, data_count, metadata = self.get_data_loaders()
         if self.model_config.augerino:
             self.reporter.train_set_len = len(train_loader)
         else:
-            self.reporter.record_first_batch(model, len(train_loader), metadata["first_item"])
+            torch_item = torch.from_numpy(metadata["first_item"]).to(torch.float32)
+            self.reporter.record_first_batch(model, len(train_loader), self.spectrogram_transform(torch_item))
         
         for epoch in range(self.model_config.epochs):
             train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
@@ -78,17 +88,10 @@ class ModelFitter:
         return out_model, out_optimizer
 
     def init_augerino_model(self):
-        dataset_params = self.model_config.dataset_params
-
         net = self.model_config.model().to(self.device)
         net.apply(init_layer)
         
-        aug = nn.Sequential(GaussianNoiseAug(), PitchShiftAug(), aud_transforms.MelSpectrogram(
-                sample_rate=BASE_SAMPLE_RATE,
-                n_mels=dataset_params["bands"],
-                n_fft=dataset_params["window_size"],
-                hop_length=dataset_params["hop_size"]
-            ))
+        aug = nn.Sequential(GaussianNoiseAug(), PitchShiftAug(), self.spectrogram_transform)
         self.model_config.model = AugAveragedModel(net, aug)
 
         out_optimizer = self.model_config.optimizer(self.model_config.model.parameters(), lr=self.model_config.lr)

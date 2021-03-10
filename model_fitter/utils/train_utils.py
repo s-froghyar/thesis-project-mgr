@@ -5,7 +5,6 @@ from .tp import get_tp_loss
 
 def train_model(model, config, reporter, device, loader, optimizer, epoch):
     model.train()
-
     reporter.reset_epoch_data()
     for batch_idx, (data, transformed_data, targets) in enumerate(loader):
         if config.is_tangent_prop:
@@ -13,7 +12,7 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
 
         predictions = get_model_prediction(model, data, targets, device, config)
         
-        loss, tp_loss = get_model_loss(predictions, targets, config, device)
+        loss, tp_loss, augerino_loss = get_model_loss(predictions, targets, config, device)
         reporter.record_batch_data(predictions, targets, loss)
 
         # backward
@@ -50,13 +49,21 @@ def get_model_prediction(model, data, targets, device, config):
 
 
 def get_model_loss(predictions, targets, config, device, x=None, transformed_data=None):
+    base_loss = config.loss(predictions, targets)
     tp_loss = 0
-    if x is not None and transformed_data is not None:
-        tp_loss = get_tp_loss(x, predictions, config.e0, device, transformed_data)
+    augerino_loss = 0
+
+    if config.is_tangent_prop:
+        tp_loss = config.gamma * get_tp_loss(x, predictions, config.e0, device, transformed_data)
+    elif config.augerino:
+        augerino_loss = get_aug_loss()
     
-    model_loss = config.loss(predictions, targets) + config.gamma * tp_loss
-    return model_loss, config.gamma * tp_loss.item()
+    model_loss = base_loss + tp_loss + augerino_loss
+    return model_loss, tp_loss, augerino_loss
 
 def init_layer(layer):
     if type(layer) == nn.Conv2d:
         nn.init.kaiming_normal_(layer.weight, mode='fan_out', nonlinearity='relu')
+
+def get_aug_loss():
+    return 0

@@ -5,10 +5,10 @@ import torch.nn as nn
 class SegmentedCNN(nn.Module):
     def __init__(self):
         super(SegmentedCNN, self).__init__()
-        self.conv1 = nn.Conv2d(1, 64, kernel_size=5, stride=(1, 3))
-        self.conv2 = nn.Conv2d(64, 32, kernel_size=5, stride=2)
+        self.conv1 = nn.Conv2d(1, 64, kernel_size=5, stride=(1, 2), padding=(2, 1))
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=5, stride=(1, 2), padding=(2, 1))
 
-        self.fc1 = nn.Linear(32*14*96, 10)
+        self.fc1 = nn.Linear(64*64*4, 10)
         self.pool = F.max_pool2d
         
     def forward(self, x):

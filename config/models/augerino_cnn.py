@@ -13,7 +13,9 @@ class AugerinoCNN(nn.Module):
         
     def forward(self, x):
         x = x.unsqueeze(1)
+        print(x.shape)
         x = F.relu(self.pool(self.conv1(x), 2))
+        print(x.shape)
         x = F.relu(self.pool(self.conv2(x), 2))
         x = x.reshape(x.shape[0], -1)
         x = self.fc1(x)

@@ -62,10 +62,11 @@ class Reporter():
         print('recording first batch data')
         
         with torch.no_grad():
-            first_item = first_item.unsqueeze(0)
-            self.train_summary_writer.add_image('images', first_item)
+            if not isinstance(first_item, np.ndarray):
+                first_item = first_item.unsqueeze(0)
+            # self.train_summary_writer.add_image('images', first_item)
             self.train_set_len = train_set_len
-            self.train_summary_writer.add_graph(model, first_item)
+            # self.train_summary_writer.add_graph(model, first_item)
     def reset_epoch_data(self):
         self.total_loss = 0
         self.total_correct = 0

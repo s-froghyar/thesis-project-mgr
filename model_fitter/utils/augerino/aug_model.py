@@ -1,7 +1,5 @@
 import torch
 import torch.nn as nn
-
-
 class AugAveragedModel(nn.Module):
     def __init__(self, model, aug,ncopies=4):
         super().__init__()

@@ -24,8 +24,8 @@ class CNNconfig:
     segmented = False
 
     dataset_params = dict(
-        frames=128,
-        bands=128,
+        frames=256,
+        bands=256,
         window_size=1024,
         hop_size=1024
     )
@@ -42,6 +42,7 @@ class BaselineCNNconfig(CNNconfig):
 class SegmentedCNNconfig(CNNconfig):
     model = SegmentedCNN
     aug_params = AugmentationParameters( (0.0, 0.1, 0.02), (-5, 0, 1) )
+    gamma = 0
     segmented = True
 
 class TpCNNconfig(CNNconfig):

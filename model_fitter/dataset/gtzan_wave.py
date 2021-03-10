@@ -157,6 +157,8 @@ def load_wave_data(data_path, aug_params=None, segmented=False, is_pre_augmented
         test_file_path = f"{data_path}/gtzan_augmented_test"
     else:
         test_file_path = f"{data_path}/gtzan_dynamic_test"
+    if segmented:
+        test_file_path += "_segmented"
     
     test_file_exists = os.path.isfile(test_file_path)
     
