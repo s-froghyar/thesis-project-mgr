@@ -27,6 +27,7 @@ def main():
     if config_name is None:
         raise ValueError('No config name passed to script!')
     print('Grabbing model_config')
+    print('lmao boli')
     config = model_configs[config_name]
     print(f'Using config {config_name}, local: ${args.local}')
 
