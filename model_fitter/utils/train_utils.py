@@ -6,46 +6,55 @@ from .tp import get_tp_loss
 def train_model(model, config, reporter, device, loader, optimizer, epoch):
     model.train()
     reporter.reset_epoch_data()
-    for batch_idx, (data, transformed_data, targets) in enumerate(loader):
+    for batch_idx, combined_data in enumerate(loader):
+        labels = combined_data[-1]
         if config.is_tangent_prop:
-            data.requires_grad = True
+            wave_data.requires_grad = True
+        data = select_data(combined_data, config)
 
-        predictions = get_model_prediction(model, data, targets, device, config)
+        n_augs = 1
+        if config.model_type == 'segmented': n_augs = len(config.aug_params.get_options_of_chosen_transform())
         
-        loss, tp_loss, augerino_loss = get_model_loss(predictions, targets, config, device)
-        reporter.record_batch_data(predictions, targets, loss)
+        print(f"n_augs: {n_augs}")
+        
+        for i in range(n_augs + 1):
+            predictions = get_model_prediction(model, data[i], labels, device, config)
 
-        # backward
-        optimizer.zero_grad()
-        loss.backward()
+            loss, tp_loss, augerino_loss = get_model_loss(predictions, targets, config, device)
+            reporter.record_batch_data(predictions, targets, loss)
 
-        # gradient descent or adam step
-        optimizer.step()
+            # backward
+            optimizer.zero_grad()
+            loss.backward()
+
+            # gradient descent or adam step
+            optimizer.step()
+        
         if batch_idx % config.log_interval == 0:
             reporter.keep_log(
                 'Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\t'.format(
                 epoch, batch_idx * len(data), len(loader.dataset),
                 100. * batch_idx / len(loader), loss.item())
-                )
+            )
     reporter.record_epoch_data(model, epoch)
+
 
 def test_model(model, device, loader):
     model.eval()
     
 
 def get_model_prediction(model, data, targets, device, config):
-    preds_sum = None
-    is_segmented = config.segmented and not config.augerino
-    if is_segmented:
-        preds_sum = torch.from_numpy(np.zeros((data.shape[0], 10)))
-        for i in range(6):
-            strip_data = data[:,i,:,:].to(device=device)
-            targets = targets.to(device=device)
-            preds = model(strip_data)
-            preds_sum += preds
-        return preds_sum
-    else:
-        return model(data.double())
+    print(f"data type: {len(data)}")
+    print(f"strip type: {len(data[0])}")
+    # print(f"strip shape: {data[0].shape}")
+    preds_sum = torch.from_numpy(np.zeros((data.shape[0], 10)))
+    for i in range(6):
+        print(data[0,i].shape)
+        strip_data = torch.from_numpy(data[:,i]).to(device=device)
+        targets = targets.to(device=device)
+        preds = model(strip_data)
+        preds_sum += preds
+    return preds_sum
 
 
 def get_model_loss(predictions, targets, config, device, x=None, transformed_data=None):
@@ -67,3 +76,11 @@ def init_layer(layer):
 
 def get_aug_loss():
     return 0
+
+def select_data(combined, conf):
+    out = {
+        "segmented": combined[2],
+        "tp": combined[1],
+        "augerino": combined[0]
+    }
+    return out[conf.model_type]

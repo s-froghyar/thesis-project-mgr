@@ -25,11 +25,12 @@ class ModelFitter:
     def fit(self): 
         model, optimizer = self.init_model()
         train_loader, test_loader, data_count, metadata = self.get_data_loaders()
-        if self.model_config.augerino:
-            self.reporter.train_set_len = len(train_loader)
-        else:
-            torch_item = torch.from_numpy(metadata["first_item"]).to(torch.float32)
-            self.reporter.record_first_batch(model, len(train_loader), self.spectrogram_transform(torch_item))
+
+        # if self.model_config.augerino:
+        self.reporter.train_set_len = len(train_loader)
+        # else:
+        #     torch_item = torch.from_numpy(metadata["first_item"]).to(torch.float32)
+        #     self.reporter.record_first_batch(model, len(train_loader), self.spectrogram_transform(torch_item))
         
         for epoch in range(self.model_config.epochs):
             train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
@@ -41,41 +42,39 @@ class ModelFitter:
 
     def get_data_loaders(self):
         print("Loading in data...")
-        dataset = None
-        if self.model_config.pre_augment:
-            print('Using pre augmentation')
-            dataset = GtzanPreAugmentedDataset
-            aug_params = self.model_config.aug_params
-        else:
-            print('Using dynamic augmentation')
-            dataset = GtzanDynamicDataset
-            aug_params = None
         
-        GTZAN, data_count = load_wave_data(
+        GTZAN, data_count = load_path_data(
             self.args.data_path,
-            aug_params=aug_params,
-            segmented=self.model_config.segmented,
-            is_pre_augmented=self.model_config.pre_augment,
-            is_local=self.args.local)
+            test_size=self.model_config.test_size,
+            is_local=self.args.local
+        )
         train_loader = DataLoader(
-            dataset(
-                GTZAN.train_x,
-                GTZAN.train_y,
-                self.model_config.dataset_params,
-                self.device,
-                train=True,
-                augerino=self.model_config.augerino), 
-            batch_size=self.model_config.batch_size)
+            GtzanDynamicDataset(
+                paths           = GTZAN.train_x,
+                labels          = GTZAN.train_y,
+                mel_spec_params = self.model_config.dataset_params,
+                aug_params      = self.model_config.aug_params,
+                device          = self.device,
+                train           = True,
+                model_type        = self.model_config.model_type
+            ), 
+            batch_size=self.model_config.batch_size
+        )
 
         test_loader = DataLoader(
-            dataset(
-                GTZAN.test_x,
-                GTZAN.test_y,
-                self.model_config.dataset_params,
-                self.device,
-                train=False,
-                augerino=self.model_config.augerino),
-            batch_size=self.model_config.batch_size, shuffle=True)
+            GtzanDynamicDataset(
+                paths           = GTZAN.test_x,
+                labels          = GTZAN.test_y,
+                mel_spec_params = self.model_config.dataset_params,
+                aug_params      = self.model_config.aug_params,
+                device          = self.device,
+                train           = False,
+                model_type        = self.model_config.model_type
+            ),
+            batch_size=self.model_config.batch_size,
+            shuffle=True
+        )
+        self.reporter.keep_log(str(GTZAN.get_metadata()))
         return train_loader, test_loader, data_count, GTZAN.get_metadata()
 
     def init_model(self):

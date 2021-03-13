@@ -2,7 +2,7 @@ from .dataset_utils import BASE_SAMPLE_RATE
 import librosa
 import numpy as np
 
-def apply_audio_transformations(x, e0):
+def apply_all_audio_transformations(x, e0):
     return gaussian_noise_injection(pitch_shift(x, e0), e0)
 
 def gaussian_noise_injection(x, snr):

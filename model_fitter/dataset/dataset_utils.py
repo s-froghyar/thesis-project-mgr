@@ -37,11 +37,5 @@ def get_data_frame(data_path, is_local):
 
     return temp_df.loc[:, ['ID','filePath', 'label']], len(temp_df)
 
-def get_correct_input_format(wave_data, is_segmented):
-    if is_segmented:
-        return generate_6_strips(wave_data)
-    else:
-        return wave_data[:465984]
-
 def generate_6_strips(wd):
     return np.array_split(wd[:465984], 6)
