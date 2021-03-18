@@ -1,4 +1,4 @@
-from config import BaselineCNNconfig, SegmentedCNNconfig, TpCNNconfig, AugerinoCNNconfig
+from config import SegmentedCNNconfig, TpCNNconfig, AugerinoCNNconfig
 from tpreporter import Reporter
 from model_fitter import ModelFitter
 import argparse
@@ -6,7 +6,6 @@ import torch
 from datetime import date
 
 model_configs = {
-    'baseline': BaselineCNNconfig,
     'segmented': SegmentedCNNconfig,
     'tp': TpCNNconfig,
     'augerino': AugerinoCNNconfig,
@@ -39,7 +38,7 @@ def main():
 
     kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
 
-    save_directory = f'{args.checkpoint}/{date.today().strftime("%d-%m-%Y")}'
+    save_directory = f'{args.checkpoint}/{date.today().strftime("%Y-%m-%d")}'
 
     print(f'Save directory: {save_directory}')
 
@@ -50,8 +49,8 @@ def main():
     if not args.test_only:
         model_fitter.fit()
 
-    train_num_correct, test_num_correct = model_fitter.evaluate()
-    print(train_num_correct, test_num_correct)
+    # train_num_correct, test_num_correct = model_fitter.evaluate()
+    # print(train_num_correct, test_num_correct)
     # reporter.keep_log(f'FINAL AVERAGE LOSS: {sum(losses) / len(losses)}')
 
 

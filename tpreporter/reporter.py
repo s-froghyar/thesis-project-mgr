@@ -71,7 +71,7 @@ class Reporter():
         self.total_loss = 0
         self.total_correct = 0
     def record_batch_data(self, predictions, targets, loss): # could be further extended
-        self.total_loss += loss.item()
+        self.total_loss += loss
         self.total_correct += get_num_correct(predictions, targets.numpy())
     
     def record_epoch_data(self, model, epoch):
@@ -86,6 +86,8 @@ class Reporter():
         if (epoch-1) == self.max_epochs:
             print('report is available through tensorboard in the reports folder')
             self.train_summary_writer.close()
+    def save_model(self, model):
+        torch.save(model.state_dict(), f"{self.log_path}/final_model.pt")
     def keep_log(self, log_string):
         log_text = f"\n{str(datetime.datetime.now())}: {log_string}"
         with open(f"{self.log_path}/logs", 'a') as f:

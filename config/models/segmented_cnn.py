@@ -18,4 +18,4 @@ class SegmentedCNN(nn.Module):
         x = x.reshape(x.shape[0], -1)
         x = self.fc1(x)
 
-        return F.softmax(x, dim=1)
+        return x

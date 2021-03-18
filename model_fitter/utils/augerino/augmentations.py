@@ -45,7 +45,7 @@ class PitchShiftAug(nn.Module):
     def __init__(self):
         super().__init__()
         self.aug=True
-        self.log_lims = nn.Parameter(torch.tensor([0., 5.]))
+        self.log_lims = nn.Parameter(torch.tensor([-12., 12.]))
 
     @property
     def lims(self):

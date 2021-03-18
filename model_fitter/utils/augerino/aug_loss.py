@@ -1,12 +1,14 @@
 import torch
 
-def unif_aug_loss(outputs, labels, model,
-                  base_loss_fn=torch.nn.CrossEntropyLoss(), reg=0.01):
-
-    base_loss = base_loss_fn(outputs, labels)
+def unif_aug_loss(augs, aug_reg=0.01):
+    aug_loss = 0
+    if len(augs) == 3:
+        lims_noise =  augs[0].lims
+        lims_pitch =  augs[1].lims
+        aug_loss -= torch.abs(lims_noise[0] - lims_noise[1]) * aug_reg
+        aug_loss -= torch.abs(lims_pitch[0] - lims_pitch[1]) * aug_reg
+    else:
+        lims_aug =  augs[0].lims
+        aug_loss -= torch.abs(lims_aug[0] - lims_aug[1]) * aug_reg
     
-    sp = torch.nn.Softplus()
-    width = sp(model.aug.width)
-    aug_loss = (width).norm()
-    
-    return base_loss - reg * aug_loss
+    return aug_loss

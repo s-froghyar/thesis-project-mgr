@@ -66,26 +66,26 @@ class GtzanDynamicDataset(Dataset):
                                                dtype = np.float32)
         
         if self.model_type == 'augerino':
-            return (generate_6_strips(wave_data), [], [], self.targets[index])
+            return (torch.tensor(np.array_split(wave_data[:465984], 6)), [], [], self.targets[index])
         
         aug_type = self.aug_params.transform_chosen
         
         if self.model_type == 'tp':
             return  (
-                generate_6_strips(wave_data),
+                self.get_6_spectrograms(wave_data),
                 self.get_6_spectrograms(self.augmentations[aug_type](wave_data, self.e0)),
                 [],
                 self.targets[index]
             )
         else:
             aug_options = self.aug_params.get_options_of_chosen_transform()
-            augs = [self.get_6_spectrograms(wave_data)]
+            augs = []
             for aug_factor in aug_options:
                 augs.append(
                     self.get_6_spectrograms(self.augmentations[aug_type](wave_data, aug_factor))
                 )
             return (
-                generate_6_strips(wave_data),
+                self.get_6_spectrograms(wave_data),
                 [],
                 augs,
                 self.targets[index]
@@ -97,11 +97,11 @@ class GtzanDynamicDataset(Dataset):
     def transform(self, x):
         x = torch.from_numpy(x).to(torch.float32)
         return self.mel_spec_transform(x)
+
     def get_6_spectrograms(self, wd):
-        patches = generate_6_strips(wd)
-        out = []
-        for patch in patches:
-            out.append(
-                self.transform(patch)
-            )
-        return out
+        patches = np.array_split(wd[:465984], 6)
+        out = torch.from_numpy(np.zeros((6, 256, 76)))
+        for ind, patch in enumerate(patches):
+            patch = torch.from_numpy(patch).to(dtype=torch.float32, device=self.device)
+            out[ind] = self.mel_spec_transform(patch)
+        return out.to(dtype=torch.float32, device=self.device)

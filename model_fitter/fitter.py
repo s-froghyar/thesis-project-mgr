@@ -34,6 +34,7 @@ class ModelFitter:
         
         for epoch in range(self.model_config.epochs):
             train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
+        self.reporter.save_model(model)
 
     def evaluate(self):
         return self.reporter.report_on_model()
@@ -83,14 +84,19 @@ class ModelFitter:
         out_model = self.model_config.model().to(self.device)
         out_model.apply(init_layer)
         
-        out_optimizer = self.model_config.optimizer(out_model.parameters(), lr=self.model_config.lr)
+        out_optimizer = self.model_config.optimizer(out_model.parameters(), weight_decay=self.model_config.weight_decay, lr=self.model_config.lr)
         return out_model, out_optimizer
 
     def init_augerino_model(self):
         net = self.model_config.model().to(self.device)
         net.apply(init_layer)
-        
-        aug = nn.Sequential(GaussianNoiseAug(), PitchShiftAug(), self.spectrogram_transform)
+
+        chosen_augs = []
+        if self.model_config.aug_params.transform_chosen == 'ps': chosen_augs = [PitchShiftAug()]
+        elif self.model_config.aug_params.transform_chosen == 'ni': chosen_augs = [GaussianNoiseAug()]
+        else: chosen_augs = [GaussianNoiseAug(), PitchShiftAug()]
+
+        aug = nn.Sequential(*tuple(chosen_augs), self.spectrogram_transform)
         self.model_config.model = AugAveragedModel(net, aug)
 
         out_optimizer = self.model_config.optimizer(self.model_config.model.parameters(), lr=self.model_config.lr)
