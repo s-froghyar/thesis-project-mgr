@@ -55,7 +55,7 @@ class GtzanDynamicDataset(Dataset):
                 n_mels=mel_spec_params["bands"],
                 n_fft=mel_spec_params["window_size"],
                 hop_length=mel_spec_params["hop_size"]
-            )
+            ).to(self.device)
 
         
     def __getitem__(self, index):
