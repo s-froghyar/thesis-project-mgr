@@ -8,7 +8,7 @@ class CNNconfig:
     epochs = 2
     lr = 0.01
     seed = 1
-    log_interval = 1
+    log_interval = 10
     save_model = True
     loss = torch.nn.CrossEntropyLoss()
     segmented = False
