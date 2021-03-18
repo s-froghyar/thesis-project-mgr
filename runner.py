@@ -48,6 +48,7 @@ def main():
 
     if not args.test_only:
         model_fitter.fit()
+    print('done')
 
     # train_num_correct, test_num_correct = model_fitter.evaluate()
     # print(train_num_correct, test_num_correct)
