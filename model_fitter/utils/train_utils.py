@@ -72,7 +72,7 @@ def get_model_prediction(model, batch_specs, targets, device, config):
 
 
 def get_model_loss(model, predictions, targets, config, device, x=None, transformed_data=None):
-    targets = targets.to(dtype=torch.float32, device=device)
+    targets = targets.to(device)
     base_loss = config.loss(predictions, targets)
     tp_loss = 0
     augerino_loss = 0
