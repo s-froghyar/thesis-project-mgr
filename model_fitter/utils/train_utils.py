@@ -10,10 +10,9 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
     reporter.reset_epoch_data()
 
     for batch_idx, (base_data, transformed_data, augmentations, targets) in enumerate(loader):
-        print(base_data.shape)
         if config.is_tangent_prop:
             base_data.requires_grad = True
-
+        targets = targets.to(device)
         n_augs = 1
         if config.model_type == 'segmented': n_augs = len(config.aug_params.get_options_of_chosen_transform()) + 1
                 
@@ -68,7 +67,7 @@ def get_model_prediction(model, batch_specs, targets, device, config):
         strip_data.requires_grad_(True)
         preds = model(strip_data)
         preds_sum += preds.to(dtype=torch.float32, device=device)
-    return preds_sum
+    return preds_sum.to(device)
 
 
 def get_model_loss(model, predictions, targets, config, device, x=None, transformed_data=None):
