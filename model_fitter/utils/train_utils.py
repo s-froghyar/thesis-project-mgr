@@ -57,7 +57,7 @@ def generate_batch_of_spectrograms(data, config, device):
     return batch_specs.to(dtype=torch.float32, device=device)
 
 def get_model_prediction(model, batch_specs, targets, device, config):
-    preds_sum = torch.from_numpy(np.zeros((batch_specs.shape[0], 10)))
+    preds_sum = torch.from_numpy(np.zeros((batch_specs.shape[0], 10))).to(dtype=torch.float32, device=device)
     for i in range(6):
         strip_data = None
         if config.model_type == 'augerino':
@@ -66,9 +66,9 @@ def get_model_prediction(model, batch_specs, targets, device, config):
             strip_data = batch_specs[:,i,:,:]
 
         strip_data.requires_grad_(True)
-        targets = targets.to(dtype=torch.float32, device=device)
+        # targets = targets.to(dtype=torch.float32, device=device)
         preds = model(strip_data)
-        preds_sum += preds
+        preds_sum += preds.to(dtype=torch.float32, device=device)
     return preds_sum
 
 
