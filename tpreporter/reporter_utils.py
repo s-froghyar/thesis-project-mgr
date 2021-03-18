@@ -2,7 +2,7 @@ import torch
 import itertools
 import numpy as np
 
-def get_num_correct(preds, labels, device):
+def get_num_correct(preds, labels):
     return preds.argmax(dim=1).eq(labels).sum().item()
 
 @torch.no_grad()
