@@ -72,7 +72,9 @@ class Reporter():
         self.total_correct = 0
     def record_batch_data(self, predictions, targets, loss): # could be further extended
         self.total_loss += loss
-        self.total_correct += get_num_correct(predictions, targets.numpy())
+        batch_correct = get_num_correct(predictions, targets)
+        self.total_correct += batch_correct
+        return batch_correct
     
     def record_epoch_data(self, model, epoch):
         self.train_summary_writer.add_scalar("Loss", self.total_loss, epoch)

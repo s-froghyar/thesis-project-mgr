@@ -8,11 +8,11 @@ from .augerino import unif_aug_loss
 def train_model(model, config, reporter, device, loader, optimizer, epoch):
     model.train()
     reporter.reset_epoch_data()
-
     for batch_idx, (base_data, transformed_data, augmentations, targets) in enumerate(loader):
         if config.is_tangent_prop:
             base_data.requires_grad = True
         targets = targets.to(device)
+        batch_correct = 0
         n_augs = 1
         if config.model_type == 'segmented': n_augs = len(config.aug_params.get_options_of_chosen_transform()) + 1
                 
@@ -26,7 +26,7 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
                                                             device,
                                                             x=base_data,
                                                             transformed_data=transformed_data)
-            reporter.record_batch_data(predictions, targets, loss)
+            batch_correct += reporter.record_batch_data(predictions, targets, loss)
 
             # backward
             optimizer.zero_grad()
@@ -41,6 +41,7 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
                     epoch, batch_idx * len(base_data), len(loader.dataset),
                     100. * batch_idx / len(loader), loss.item(), tp_loss, augerino_loss)
                 )
+    reporter.keep_log(f"epoch {epoch} accuracy: {batch_correct / len(loader)}")
     # reporter.record_epoch_data(model, epoch)
 
 

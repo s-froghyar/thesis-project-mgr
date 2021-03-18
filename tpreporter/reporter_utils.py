@@ -2,8 +2,8 @@ import torch
 import itertools
 import numpy as np
 
-def get_num_correct(preds, labels):
-    return preds.argmax(dim=1).eq(torch.from_numpy(labels)).sum().item()
+def get_num_correct(preds, labels, device):
+    return preds.argmax(dim=1).eq(labels).sum().item()
 
 @torch.no_grad()
 def get_all_preds(model, loader):
