@@ -37,6 +37,7 @@ class ModelFitter:
 
         self.evaluate(model, test_loader)
 
+
     def evaluate(self, model, loader):
         self.reporter.keep_log('Evaluation has started')
         # confusion matrix needs all targets and predictions
