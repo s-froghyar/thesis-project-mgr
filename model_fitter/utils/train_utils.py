@@ -3,18 +3,19 @@ import numpy as np
 import torch
 
 from .tp import get_tp_loss
-from .augerino import unif_aug_loss
+from .augerino import unif_aug_loss, GaussianNoiseAug, PitchShiftAug
 
 def train_model(model, config, reporter, device, loader, optimizer, epoch):
+    model = model.double()
     model.train()
-    reporter.reset_epoch_data()
-    for batch_idx, (base_data, transformed_data, augmentations, targets) in enumerate(loader):
+
+    for batch_idx, (base_data, transformed_data, augmentations, waveforms, targets) in enumerate(loader):
         if config.is_tangent_prop:
             base_data.requires_grad = True
         targets = targets.to(device)
-        batch_correct = 0
         n_augs = 1
-        if config.model_type == 'segmented': n_augs = len(config.aug_params.get_options_of_chosen_transform()) + 1
+        if config.model_type == 'segmented':
+            n_augs = len(config.aug_params.get_options_of_chosen_transform()) + 1
                 
         for i in range(n_augs):
             predictions = get_model_prediction(model, base_data, targets, device, config)
@@ -26,7 +27,7 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
                                                             device,
                                                             x=base_data,
                                                             transformed_data=transformed_data)
-            batch_correct += reporter.record_batch_data(predictions, targets, loss)
+            reporter.record_batch_data(predictions, targets, (loss, tp_loss, augerino_loss))
 
             # backward
             optimizer.zero_grad()
@@ -41,12 +42,34 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
                     epoch, batch_idx * len(base_data), len(loader.dataset),
                     100. * batch_idx / len(loader), loss.item(), tp_loss, augerino_loss)
                 )
-    reporter.keep_log(f"epoch {epoch} accuracy: {batch_correct / len(loader)}")
-    # reporter.record_epoch_data(model, epoch)
+                # self.training_loss_values.append(loss.item())
 
 
-def test_model(model, device, loader):
+    
+
+
+def test_model(model, config, reporter, device, loader, spec_transform):
+    model = model.float()
     model.eval()
+    chosen_aug = config.aug_params.transform_chosen
+
+    tta = None
+    if chosen_aug == 'ni':
+        tta = nn.Sequential(GaussianNoiseAug(), spec_transform.to(torch.float32))
+    else:
+        tta = nn.Sequential(PitchShiftAug(), spec_transform.to(torch.float32))
+    tta = tta.double()
+    with torch.no_grad():
+        for batch_idx, (base_data, transformed_data, augmentations, waveforms, targets) in enumerate(loader):
+            for i in range(6):
+                data = None
+                if config.model_type == 'augerino':
+                    data = waveforms[:,i,:]
+                else:
+                    data = tta(waveforms[:,i,:].double())
+                predictions = model(data)
+                reporter.record_tta(predictions, targets)
+
     
 def generate_batch_of_spectrograms(data, config, device):
     batch_specs = torch.from_numpy(np.zeros((data.shape[0], 6, 256, 76)))

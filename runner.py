@@ -28,6 +28,7 @@ def main():
         raise ValueError('No config name passed to script!')
     print('Grabbing model_config')
     config = model_configs[config_name]
+    if args.local: config.epochs = 5
     config.aug_params.set_chosen_transform(args.transform)
     print(f'Using config {config_name}, transformation: {args.transform}, local: ${args.local}')
 
@@ -42,7 +43,7 @@ def main():
 
     print(f'Save directory: {save_directory}')
 
-    reporter = Reporter(config_name, config.epochs, save_directory)
+    reporter = Reporter(config_name, config, save_directory)
 
     model_fitter = ModelFitter(args, config, device, kwargs, reporter)
 

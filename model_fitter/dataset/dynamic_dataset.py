@@ -66,7 +66,12 @@ class GtzanDynamicDataset(Dataset):
                                                dtype = np.float32)
         
         if self.model_type == 'augerino':
-            return (torch.tensor(np.array_split(wave_data[:465984], 6)), [], [], self.targets[index])
+            return (
+                torch.tensor(np.array_split(wave_data[:465984], 6)),
+                [],
+                [],
+                torch.tensor(np.array_split(wave_data[:465984], 6)),
+                self.targets[index])
         
         aug_type = self.aug_params.transform_chosen
         
@@ -75,6 +80,7 @@ class GtzanDynamicDataset(Dataset):
                 self.get_6_spectrograms(wave_data),
                 self.get_6_spectrograms(self.augmentations[aug_type](wave_data, self.e0)),
                 [],
+                torch.tensor(np.array_split(wave_data[:465984], 6)),
                 self.targets[index]
             )
         else:
@@ -88,6 +94,7 @@ class GtzanDynamicDataset(Dataset):
                 self.get_6_spectrograms(wave_data),
                 [],
                 augs,
+                torch.tensor(np.array_split(wave_data[:465984], 6)),
                 self.targets[index]
             )
 

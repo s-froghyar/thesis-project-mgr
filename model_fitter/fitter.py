@@ -26,18 +26,58 @@ class ModelFitter:
         model, optimizer = self.init_model()
         train_loader, test_loader, data_count, metadata = self.get_data_loaders()
 
-        # if self.model_config.augerino:
-        self.reporter.train_set_len = len(train_loader)
-        # else:
-        #     torch_item = torch.from_numpy(metadata["first_item"]).to(torch.float32)
-        #     self.reporter.record_first_batch(model, len(train_loader), self.spectrogram_transform(torch_item))
+        self.reporter.train_set_len = len(train_loader.dataset)
         
         for epoch in range(self.model_config.epochs):
             train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
+            test_model(model, self.model_config, self.reporter, self.device, test_loader, self.spectrogram_transform)
+            self.reporter.record_epoch_data(epoch)
         self.reporter.save_model(model)
+        self.reporter.save_metrics()
 
-    def evaluate(self):
-        return self.reporter.report_on_model()
+        self.evaluate(model, test_loader)
+
+    def evaluate(self, model, loader):
+        self.reporter.keep_log('Evaluation has started')
+        # confusion matrix needs all targets and predictions
+        model = model.float()
+        model.eval()
+        chosen_aug = self.model_config.aug_params.transform_chosen
+        all_preds = None
+        all_targets = None
+        tta = None
+        if chosen_aug == 'ni':
+            tta = nn.Sequential(GaussianNoiseAug(), self.spectrogram_transform.to(torch.float32))
+        else:
+            tta = nn.Sequential(PitchShiftAug(), self.spectrogram_transform.to(torch.float32))
+        tta = tta.double()
+        with torch.no_grad():
+            for batch_idx, (base_data, transformed_data, augmentations, waveforms, targets) in enumerate(loader):
+                new_targets = []
+                for t in targets:
+                    for _ in range(6):
+                        new_targets.append(t)
+                new_targets = torch.tensor(new_targets)
+                for i in range(6):
+                    data = None
+                    if self.model_config.model_type == 'augerino':
+                        data = waveforms[:,i,:]
+                    else:
+                        data = tta(waveforms[:,i,:].double())
+                    predictions = model(data)
+                    if all_preds is None:
+                        all_preds = predictions
+                    else:
+                        all_preds = torch.vstack((all_preds, predictions))
+
+        
+                    self.reporter.record_tta(predictions, targets)
+                if all_targets is None:
+                    all_targets = new_targets
+                else:
+                    all_targets = torch.vstack((all_targets, new_targets))
+        self.reporter.save_predictions_for_cm(all_preds, all_targets)
+
 
 
 
@@ -81,7 +121,7 @@ class ModelFitter:
     def init_model(self):
         if self.model_config.augerino:
             return self.init_augerino_model()
-        out_model = self.model_config.model().to(self.device)
+        out_model = self.model_config.model().to(device=self.device, dtype=torch.float32)
         out_model.apply(init_layer)
         
         out_optimizer = self.model_config.optimizer(out_model.parameters(), weight_decay=self.model_config.weight_decay, lr=self.model_config.lr)
@@ -96,7 +136,7 @@ class ModelFitter:
         elif self.model_config.aug_params.transform_chosen == 'ni': chosen_augs = [GaussianNoiseAug()]
         else: chosen_augs = [GaussianNoiseAug(), PitchShiftAug()]
 
-        aug = nn.Sequential(*tuple(chosen_augs), self.spectrogram_transform)
+        aug = nn.Sequential(*tuple(chosen_augs), self.spectrogram_transform.float())
         self.model_config.model = AugAveragedModel(net, aug)
 
         out_optimizer = self.model_config.optimizer(self.model_config.model.parameters(), lr=self.model_config.lr)

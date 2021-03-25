@@ -32,16 +32,27 @@ class Reporter():
                 b) report on model to generate confusion matrices and accuracies
                     # train_num_correct, test_num_correct = reporter.report_on_model()
     """
-    def __init__(self, name, max_epochs, save_directory):
+    def __init__(self, name, config, save_directory):
         if name not in possible_names:
             raise ValueError('name is not recognized from possible experiment names')
         
         self.name = name
         self.log_path = save_directory
-        self.max_epochs = max_epochs
+        self.config = config
 
-        self.train_confusion_matrix = None
-        self.test_confusion_matrix = None
+        self.epoch_losses = []
+        self.epoch_corrects = []
+        self.epoch_accuracies = []
+
+        self.total_loss = 0
+        self.total_correct = 0
+        self.augerino_losses = []
+        self.tp_losses = []
+        self.tta_correct = []
+        self.tta_correct_val = 0
+
+        # self.train_confusion_matrix = None
+        # self.test_confusion_matrix = None
         self.create_logging_env()
         self.train_summary_writer = SummaryWriter(f"{self.log_path}/tensorboard")
         self.keep_log(
@@ -52,44 +63,63 @@ class Reporter():
             '''
         )
 
-    def set_post_training_values(self, model, train_set, test_set):
-        self.model = model
-        self.train_set = train_set
-        self.test_set = test_set
-    
-    
-    def record_first_batch(self, model, train_set_len, first_item):
-        print('recording first batch data')
+    def record_batch_data(self, predictions, targets, losses):
+        loss, tp_loss, augerino_loss = losses
+
+        self.record_specific_loss(tp_loss, augerino_loss)
+        self.total_loss += loss.item()
         
-        with torch.no_grad():
-            if not isinstance(first_item, np.ndarray):
-                first_item = first_item.unsqueeze(0)
-            # self.train_summary_writer.add_image('images', first_item)
-            self.train_set_len = train_set_len
-            # self.train_summary_writer.add_graph(model, first_item)
-    def reset_epoch_data(self):
-        self.total_loss = 0
-        self.total_correct = 0
-    def record_batch_data(self, predictions, targets, loss): # could be further extended
-        self.total_loss += loss
-        batch_correct = get_num_correct(predictions, targets)
-        self.total_correct += batch_correct
-        return batch_correct
-    
-    def record_epoch_data(self, model, epoch):
+        self.total_correct += get_num_correct(predictions, targets)
+
+    def record_specific_loss(self, tp, aug):
+        if self.config.model_type == 'augerino':
+            self.augerino_losses.append(aug.item())
+        elif self.config.model_type == 'tp':
+            self.tp_losses.append(tp.item())
+    def record_tta(self, preds, targets):
+        self.tta_correct_val += get_num_correct(preds, targets)
+
+    def record_epoch_data(self, epoch):
         self.train_summary_writer.add_scalar("Loss", self.total_loss, epoch)
         self.train_summary_writer.add_scalar("Correct", self.total_correct, epoch)
         self.train_summary_writer.add_scalar("Accuracy", self.total_correct / self.train_set_len, epoch)
 
-        self.train_summary_writer.add_histogram("conv1.bias", model.conv1.bias, epoch)
-        self.train_summary_writer.add_histogram("conv1.weight", model.conv1.weight, epoch)
-        self.train_summary_writer.add_histogram("conv2.bias", model.conv2.bias, epoch)
-        self.train_summary_writer.add_histogram("conv2.weight", model.conv2.weight, epoch)
-        if (epoch-1) == self.max_epochs:
+        self.epoch_losses.append(self.total_loss)
+        self.epoch_corrects.append(self.total_correct)
+        self.epoch_accuracies.append(self.total_correct / self.train_set_len)
+
+        self.tta_correct.append(self.tta_correct_val)
+        # self.train_summary_writer.add_histogram("conv1.bias", model.conv1.bias, epoch)
+        # self.train_summary_writer.add_histogram("conv1.weight", model.conv1.weight, epoch)
+        # self.train_summary_writer.add_histogram("conv2.bias", model.conv2.bias, epoch)
+        # self.train_summary_writer.add_histogram("conv2.weight", model.conv2.weight, epoch)
+        if (epoch-1) == self.config.epochs:
             print('report is available through tensorboard in the reports folder')
             self.train_summary_writer.close()
+        self.reset_epoch_data()
+
+    def reset_epoch_data(self):
+        self.keep_log(f"Epoch finished with accuracy: {self.total_correct / self.train_set_len}")
+        self.total_loss = 0
+        self.total_correct = 0
+        self.tta_correct_val = 0
+    def save_metrics(self):
+        torch.save({
+            "epoch_losses": self.epoch_losses,
+            "epoch_corrects": self.epoch_corrects,
+            "epoch_accuracies": self.epoch_accuracies,
+            "augerino_losses": self.augerino_losses,
+            "tp_losses": self.tp_losses,
+            "tta_correct": self.tta_correct
+        }, f"{self.log_path}/model.metrics")
+    def save_predictions_for_cm(self, preds, targets):
+        torch.save({
+            "predictions": preds,
+            "targets": targets,
+        }, f"{self.log_path}/confusion_matrix")
     def save_model(self, model):
         torch.save(model.state_dict(), f"{self.log_path}/final_model.pt")
+    
     def keep_log(self, log_string):
         log_text = f"\n{str(datetime.datetime.now())}: {log_string}"
         with open(f"{self.log_path}/logs", 'a') as f:
