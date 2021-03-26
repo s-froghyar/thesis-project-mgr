@@ -7,6 +7,7 @@ from .augerino import unif_aug_loss, GaussianNoiseAug, PitchShiftAug
 
 def train_model(model, config, reporter, device, loader, optimizer, epoch):
     model = model.double()
+    model = model.to(device=device)
     model.train()
 
     for batch_idx, (base_data, transformed_data, augmentations, waveforms, targets) in enumerate(loader):

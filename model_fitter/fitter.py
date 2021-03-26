@@ -129,7 +129,7 @@ class ModelFitter:
         return out_model, out_optimizer
 
     def init_augerino_model(self):
-        net = self.model_config.model().to(self.device)
+        net = self.model_config.model().to(device=self.device, dtype=torch.float32)
         net.apply(init_layer)
 
         chosen_augs = []
