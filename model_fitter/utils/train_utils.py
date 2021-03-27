@@ -69,7 +69,7 @@ def test_model(model, config, reporter, device, loader, spec_transform):
                 else:
                     data = tta(waveforms[:,i,:].double())
                 predictions = model(data)
-                reporter.record_tta(predictions, targets)
+                reporter.record_tta(predictions.to(device), targets.to(device))
 
     
 def generate_batch_of_spectrograms(data, config, device):
