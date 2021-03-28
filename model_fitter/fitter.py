@@ -72,7 +72,7 @@ class ModelFitter:
                         all_preds = torch.vstack((all_preds, predictions))
 
         
-                    self.reporter.record_tta(predictions, targets)
+                    self.reporter.record_tta(predictions.to(self.device), targets.to(self.device))
                 if all_targets is None:
                     all_targets = new_targets
                 else:
