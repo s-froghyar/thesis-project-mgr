@@ -102,6 +102,7 @@ class Reporter():
         self.total_loss = 0
         self.total_correct = 0
         self.tta_correct_val = 0
+        
     def save_metrics(self, epoch):
         torch.save({
             "epoch_losses": self.epoch_losses,
