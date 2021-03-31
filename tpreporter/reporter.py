@@ -2,7 +2,6 @@ import os, re, os.path
 import torch
 from torch.utils.tensorboard import SummaryWriter
 import torchvision
-from sklearn.metrics import confusion_matrix
 from .reporter_utils import *
 import numpy as np
 import datetime
@@ -103,7 +102,7 @@ class Reporter():
         self.total_loss = 0
         self.total_correct = 0
         self.tta_correct_val = 0
-    def save_metrics(self):
+    def save_metrics(self, epoch):
         torch.save({
             "epoch_losses": self.epoch_losses,
             "epoch_corrects": self.epoch_corrects,
@@ -111,14 +110,14 @@ class Reporter():
             "augerino_losses": self.augerino_losses,
             "tp_losses": self.tp_losses,
             "tta_correct": self.tta_correct
-        }, f"{self.log_path}/model.metrics")
-    def save_predictions_for_cm(self, preds, targets):
+        }, f"{self.log_path}/model_metrics_e{epoch}")
+    def save_predictions_for_cm(self, preds, targets, epoch):
         torch.save({
             "predictions": preds,
             "targets": targets,
-        }, f"{self.log_path}/confusion_matrix")
-    def save_model(self, model):
-        torch.save(model.state_dict(), f"{self.log_path}/final_model.pt")
+        }, f"{self.log_path}/confusion_matrix_e{epoch}")
+    def save_model(self, model, epoch):
+        torch.save(model.state_dict(), f"{self.log_path}/e{epoch}_model.pt")
     
     def keep_log(self, log_string):
         log_text = f"\n{str(datetime.datetime.now())}: {log_string}"

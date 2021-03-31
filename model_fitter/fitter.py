@@ -32,13 +32,17 @@ class ModelFitter:
             train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
             test_model(model, self.model_config, self.reporter, self.device, test_loader, self.spectrogram_transform)
             self.reporter.record_epoch_data(epoch)
+            if epoch % 5 == 0:
+                self.evaluate(model, test_loader, epoch)
+                self.reporter.save_model(model, epoch)
+                self.reporter.save_metrics(epoch)
         self.reporter.save_model(model)
         self.reporter.save_metrics()
 
-        self.evaluate(model, test_loader)
+        self.evaluate(model, test_loader, 'final')
 
 
-    def evaluate(self, model, loader):
+    def evaluate(self, model, loader, count):
         self.reporter.keep_log('Evaluation has started')
         # confusion matrix needs all targets and predictions
         model = model.float()
@@ -77,7 +81,7 @@ class ModelFitter:
                     all_targets = new_targets
                 else:
                     all_targets = torch.vstack((all_targets, new_targets))
-        self.reporter.save_predictions_for_cm(all_preds, all_targets)
+        self.reporter.save_predictions_for_cm(all_preds, all_targets, count)
 
 
 
