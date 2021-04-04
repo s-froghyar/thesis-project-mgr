@@ -5,7 +5,6 @@ import torchaudio
 import torchaudio.transforms as aud_transforms
 from sklearn.model_selection import train_test_split
 import librosa
-import librosa.display as lib_disb
 import numpy as np
 
 from .dataset_utils import BASE_SAMPLE_RATE, generate_6_strips
