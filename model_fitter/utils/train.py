@@ -48,5 +48,4 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
                     epoch, batch_idx * len(base_data), len(loader.dataset),
                     100. * batch_idx / len(loader), loss.item(), tp_loss, augerino_loss)
                 )
-                # self.training_loss_values.append(loss.item())
 
