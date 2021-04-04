@@ -68,7 +68,7 @@ class GtzanDynamicDataset(Dataset):
         wave_data = self.load_audio(path)
         if self.model_type == 'augerino':
             return (
-                torch.tensor(np.array_split(wave_data[:465984], 6)),
+                wave_data[:465984].clone().detach().requires_grad_(True),
                 [],
                 self.targets[index])
         

@@ -2,6 +2,7 @@ from .dataset import *
 from .utils import *
 from .utils import GaussianNoiseAug, PitchShiftAug, AugAveragedModel
 import time
+import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchaudio.transforms as aud_transforms
 
@@ -14,11 +15,14 @@ class ModelFitter:
         self.reporter = reporter
 
         dataset_params = self.model_config.dataset_params
-        self.spectrogram_transform = aud_transforms.MelSpectrogram(
-                sample_rate=BASE_SAMPLE_RATE,
-                n_mels=dataset_params["bands"],
-                n_fft=dataset_params["window_size"],
-                hop_length=dataset_params["hop_size"]
+        self.spectrogram_transform = (
+                aud_transforms.MelSpectrogram(
+                    sample_rate=BASE_SAMPLE_RATE,
+                    n_mels=dataset_params["bands"],
+                    n_fft=dataset_params["window_size"],
+                    hop_length=dataset_params["hop_size"]
+                ),
+                aud_transforms.AmplitudeToDB()
             )
 
 
@@ -68,7 +72,6 @@ class ModelFitter:
                 aug_params      = self.model_config.aug_params,
                 device          = self.device,
                 train           = False,
-                model_type      = self.model_config.model_type,
                 tta_settings    = self.model_config.tta_settings[self.model_config.aug_params.transform_chosen]
             ),
             batch_size=self.model_config.batch_size,
@@ -95,8 +98,8 @@ class ModelFitter:
         elif self.model_config.aug_params.transform_chosen == 'ni': chosen_augs = [GaussianNoiseAug()]
         else: chosen_augs = [GaussianNoiseAug(), PitchShiftAug()]
 
-        aug = nn.Sequential(*tuple(chosen_augs), self.spectrogram_transform.float())
-        self.model_config.model = AugAveragedModel(net, aug)
+        aug = nn.Sequential(*tuple(chosen_augs), *self.spectrogram_transform)
+        self.model_config.model = AugAveragedModel(net, aug, get_model_prediction)
 
         out_optimizer = self.model_config.optimizer(self.model_config.model.parameters(), lr=self.model_config.lr)
         return self.model_config.model, out_optimizer

@@ -24,6 +24,8 @@ def generate_batch_of_spectrograms(data, config, device):
 
 def get_model_prediction(model, batch_specs, device, model_type):
     ''' Gets the sum of the predictions for the 6 patches of the spectrogram '''
+    if model_type == 'augerino':
+        return model(batch_specs)
     preds_sum = torch.from_numpy(np.zeros((batch_specs.shape[0], 10))).to(dtype=torch.float32, device=device)
     for i in range(6):
         strip_data = batch_specs[:,i,:,:]

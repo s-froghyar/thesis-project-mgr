@@ -34,7 +34,6 @@ class GtzanTTADataset(Dataset):
         aug_params=None,
         device=None,
         train=False,
-        model_type='segmented',
         tta_settings=None
     ):
         self.X = paths
@@ -47,20 +46,18 @@ class GtzanTTADataset(Dataset):
             'ni': gaussian_noise_injection,
             'ps': pitch_shift
         }
-        self.model_type = model_type
 
-        if model_type != 'augerino':
-            self.e0 = mel_spec_params["e0"]
-            
-            self.mel_spec_transform = nn.Sequential(
-                aud_transforms.MelSpectrogram(
-                        sample_rate=BASE_SAMPLE_RATE,
-                        n_mels=mel_spec_params["bands"],
-                        n_fft=mel_spec_params["window_size"],
-                        hop_length=mel_spec_params["hop_size"]
-                ),
-                aud_transforms.AmplitudeToDB()
-            )
+        self.e0 = mel_spec_params["e0"]
+        
+        self.mel_spec_transform = nn.Sequential(
+            aud_transforms.MelSpectrogram(
+                    sample_rate=BASE_SAMPLE_RATE,
+                    n_mels=mel_spec_params["bands"],
+                    n_fft=mel_spec_params["window_size"],
+                    hop_length=mel_spec_params["hop_size"]
+            ),
+            aud_transforms.AmplitudeToDB()
+        )
             
 
 
