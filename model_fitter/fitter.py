@@ -30,60 +30,13 @@ class ModelFitter:
         
         for epoch in range(self.model_config.epochs):
             train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
-            test_model(model, self.model_config, self.reporter, self.device, test_loader, self.spectrogram_transform)
+            test_model(model, self.model_config, self.reporter, self.device, test_loader, epoch)
             self.reporter.record_epoch_data(epoch)
             if epoch % 5 == 0:
-                self.evaluate(model, test_loader, epoch)
                 self.reporter.save_model(model, epoch)
                 self.reporter.save_metrics(epoch)
-        self.reporter.save_model(model)
-        self.reporter.save_metrics()
-
-        self.evaluate(model, test_loader, 'final')
-
-
-    def evaluate(self, model, loader, count):
-        self.reporter.keep_log('Evaluation has started')
-        # confusion matrix needs all targets and predictions
-        model = model.float()
-        model.eval()
-        chosen_aug = self.model_config.aug_params.transform_chosen
-        all_preds = None
-        all_targets = None
-        tta = None
-        if chosen_aug == 'ni':
-            tta = nn.Sequential(GaussianNoiseAug(), self.spectrogram_transform.to(torch.float32))
-        else:
-            tta = nn.Sequential(PitchShiftAug(), self.spectrogram_transform.to(torch.float32))
-        tta = tta.double()
-        with torch.no_grad():
-            for batch_idx, (base_data, transformed_data, augmentations, waveforms, targets) in enumerate(loader):
-                new_targets = []
-                for t in targets:
-                    for _ in range(6):
-                        new_targets.append(t)
-                new_targets = torch.tensor(new_targets)
-                for i in range(6):
-                    data = None
-                    if self.model_config.model_type == 'augerino':
-                        data = waveforms[:,i,:]
-                    else:
-                        data = tta(waveforms[:,i,:].double())
-                    predictions = model(data)
-                    if all_preds is None:
-                        all_preds = predictions
-                    else:
-                        all_preds = torch.vstack((all_preds, predictions))
-
-        
-                    self.reporter.record_tta(predictions.to(self.device), targets.to(self.device))
-                if all_targets is None:
-                    all_targets = new_targets
-                else:
-                    all_targets = torch.vstack((all_targets, new_targets))
-        self.reporter.save_predictions_for_cm(all_preds, all_targets, count)
-
-
+        self.reporter.save_model(model, 'final')
+        self.reporter.save_metrics('final')
 
 
     def get_data_loaders(self):
@@ -108,14 +61,15 @@ class ModelFitter:
         )
 
         test_loader = DataLoader(
-            GtzanDynamicDataset(
+            GtzanTTADataset(
                 paths           = GTZAN.test_x,
                 labels          = GTZAN.test_y,
                 mel_spec_params = self.model_config.dataset_params,
                 aug_params      = self.model_config.aug_params,
                 device          = self.device,
                 train           = False,
-                model_type        = self.model_config.model_type
+                model_type      = self.model_config.model_type,
+                tta_settings    = self.model_config.tta_settings[self.model_config.aug_params.transform_chosen]
             ),
             batch_size=self.model_config.batch_size,
             shuffle=True

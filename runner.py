@@ -28,6 +28,7 @@ def main():
         raise ValueError('No config name passed to script!')
     print('Grabbing model_config')
     config = model_configs[config_name]
+    config.local = args.local
     if args.local: config.epochs = 5
     config.aug_params.set_chosen_transform(args.transform)
     print(f'Using config {config_name}, transformation: {args.transform}, local: ${args.local}')

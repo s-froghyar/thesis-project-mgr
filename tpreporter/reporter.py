@@ -6,7 +6,7 @@ from .reporter_utils import *
 import numpy as np
 import datetime
 
-possible_names = ['baseline', 'segmented', 'tp', 'augerino']
+possible_names = ['segmented', 'tp', 'augerino']
 
 class Reporter():
     """
@@ -50,8 +50,6 @@ class Reporter():
         self.tta_correct = []
         self.tta_correct_val = 0
 
-        # self.train_confusion_matrix = None
-        # self.test_confusion_matrix = None
         self.create_logging_env()
         self.train_summary_writer = SummaryWriter(f"{self.log_path}/tensorboard")
         self.keep_log(
@@ -76,7 +74,8 @@ class Reporter():
         elif self.config.model_type == 'tp':
             self.tp_losses.append(tp.item())
     def record_tta(self, preds, targets):
-        self.tta_correct_val += get_num_correct(preds, targets)
+        num_corr = get_num_correct(preds, targets)
+        self.tta_correct_val += num_corr
 
     def record_epoch_data(self, epoch):
         self.train_summary_writer.add_scalar("Loss", self.total_loss, epoch)

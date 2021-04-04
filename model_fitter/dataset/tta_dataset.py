@@ -3,7 +3,9 @@ import torch.nn as nn
 from torch.utils.data import Dataset
 import torchaudio
 import torchaudio.transforms as aud_transforms
+from sklearn.model_selection import train_test_split
 import librosa
+import librosa.display as lib_disb
 import numpy as np
 
 from .dataset_utils import BASE_SAMPLE_RATE, generate_6_strips
@@ -11,7 +13,7 @@ from .transformations import gaussian_noise_injection, pitch_shift
 
 torchaudio.set_audio_backend("sox_io")
 
-class GtzanDynamicDataset(Dataset):
+class GtzanTTADataset(Dataset):
     '''
     Arguments
         - X: path_to_wave_data
@@ -33,14 +35,15 @@ class GtzanDynamicDataset(Dataset):
         aug_params=None,
         device=None,
         train=False,
-        model_type='segmented'
+        model_type='segmented',
+        tta_settings=None
     ):
         self.X = paths
         self.targets = labels
         self.aug_params = aug_params
         self.device = device
         self.train = train
-
+        self.tta = tta_settings
         self.augmentations = {
             'ni': gaussian_noise_injection,
             'ps': pitch_shift
@@ -66,33 +69,17 @@ class GtzanDynamicDataset(Dataset):
     def __getitem__(self, index):
         path = self.X[index]
         wave_data = self.load_audio(path)
-        if self.model_type == 'augerino':
-            return (
-                torch.tensor(np.array_split(wave_data[:465984], 6)),
-                [],
-                self.targets[index])
-        
+
         aug_type = self.aug_params.transform_chosen
-        
-        if self.model_type == 'tp':
-            return  (
-                self.get_6_spectrograms(wave_data),
-                self.get_6_spectrograms(self.augmentations[aug_type](wave_data, self.e0)),
-                self.targets[index]
+        aug_options = torch.rand(4, device=self.device) * (self.tta[1] - self.tta[0]) + self.tta[0]
+
+        augs = []
+        for aug_factor in aug_options:
+            augmented_wd = self.augmentations[aug_type](wave_data, aug_factor)
+            augs.append(
+                self.get_6_spectrograms(augmented_wd)
             )
-        else:
-            aug_options = self.aug_params.get_options_of_chosen_transform()
-            augs = []
-            for aug_factor in aug_options:
-                augmented_wd = self.augmentations[aug_type](wave_data, aug_factor)
-                augs.append(
-                    self.get_6_spectrograms(augmented_wd)
-                )
-            return (
-                torch.stack(augs),
-                [],
-                self.targets[index]
-            )
+        return (torch.stack(augs), self.targets[index])
 
          
     def __len__(self):

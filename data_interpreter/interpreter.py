@@ -3,24 +3,29 @@ import itertools
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
+import argparse
+
+
+
+parser = argparse.ArgumentParser(description='Plot confusion matrix')
+
+parser.add_argument('--epoch', '-e', required=True, choices=[str(x*5) for x in range(11)], help='The epoch checkpoint to display')
 
 def main():
-    date = '2021-03-28'
-    run_id = '2'
+    date = '2021-03-31'
+    run_id = '1'
+    
+    args = parser.parse_args()
     run_path = f"{date}/run_{run_id}"
-    cm = load_confusion_matrix(run_path)
+    cm = load_confusion_matrix(run_path, args.epoch)
     cm['predictions'] = cm['predictions'].argmax(dim=1)
     cm['targets'] = cm['targets'].view(-1)
-    # print(cm['predictions'].shape) # preds.argmax(dim=1)
-    # print(cm['targets'].view(-1).shape)
-    # print(cm['predictions'][0])
-    # print(cm['targets'][0])
     cm = confusion_matrix(cm['targets'], cm['predictions'])
-    plot_confusion_matrix(cm, normalize=True)
+    plot_confusion_matrix(cm, normalize=False)
 
 
-def load_confusion_matrix(run_path):
-    return torch.load(f"{run_path}/confusion_matrix", map_location=torch.device('cpu'))
+def load_confusion_matrix(run_path, poch):
+    return torch.load(f"{run_path}/confusion_matrix_e{poch}", map_location=torch.device('cpu'))
 
 def plot_confusion_matrix(cm, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
     classes = ['Blues', 'Classical', 'Country', 'Disco', 'Hiphop', 'Jazz', 'Metal', 'Pop', 'Reggae', 'Rock']
@@ -46,7 +51,7 @@ def plot_confusion_matrix(cm, normalize=False, title='Confusion matrix', cmap=pl
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
-
+    plt.savefig('lmao.png')
 
 if __name__ == "__main__":    
     main()

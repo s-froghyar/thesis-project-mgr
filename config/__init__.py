@@ -15,6 +15,7 @@ class CNNconfig:
     test_size = 0.2
     BASE_SAMPLE_RATE = 16000
     model = SegmentedCNN
+    local = False
 
     dataset_params = dict(
         frames=256,
@@ -32,9 +33,12 @@ class CNNconfig:
 
     aug_params = AugmentationParameters(
         ni = (0.0, 0.2, 0.02),
-        ps = [-12, 12]
+        ps = [-12, 0, 12]
     )
-
+    tta_settings = {
+        'ni': (0.0, 0.2),
+        'ps': (-12., 12.)
+    }
     optimizer = optim.Adam
     weight_decay = 5e-4
     is_tangent_prop = False

@@ -7,3 +7,5 @@ reports/
 build/
 in_dev/
 checkpoints/
+data_interpreter/
+experiments/
