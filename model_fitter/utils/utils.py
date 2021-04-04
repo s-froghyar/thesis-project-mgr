@@ -6,12 +6,6 @@ from .augerino import *
 from .tp import *
 
 
-
-
-    
-
-
-
 def get_final_preds(all_preds):
     bs = all_preds[0].shape[0]
     out = torch.from_numpy(np.zeros((bs, 10))).to(dtype=torch.float32)

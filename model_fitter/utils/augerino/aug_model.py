@@ -3,8 +3,8 @@ import torch.nn as nn
 class AugAveragedModel(nn.Module):
     def __init__(self, model, aug, ncopies=4):
         super().__init__()
-        self.aug = aug.double()
-        self.model = model.double()
+        self.aug = aug
+        self.model = model
         self.ncopies = ncopies
     def forward(self, x):
         if self.training:

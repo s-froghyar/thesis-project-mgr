@@ -8,8 +8,6 @@ from .tp import get_tp_loss
 from .augerino import unif_aug_loss, GaussianNoiseAug, PitchShiftAug
 
 def train_model(model, config, reporter, device, loader, optimizer, epoch):
-    if not config.local:
-        model = model.double()
     model.train()
 
     for batch_idx, (base_data, transformed_data, targets) in enumerate(loader):

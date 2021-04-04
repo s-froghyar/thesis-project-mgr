@@ -9,8 +9,8 @@ from .augerino import unif_aug_loss, GaussianNoiseAug, PitchShiftAug
 
 def test_model(model, config, reporter, device, loader, epoch):
     ''' TTA '''
-    if config.local:
-        model = model.float()
+    # if config.local:
+    #     model = model.float()
     
     model.eval()
     chosen_aug = config.aug_params.transform_chosen
@@ -18,9 +18,6 @@ def test_model(model, config, reporter, device, loader, epoch):
     all_targets = None
     all_predictions = None
     
-    if not config.local:
-        tta = tta.double()
-
     with torch.no_grad():
         for batch_idx, (base_data, targets) in enumerate(loader):
             preds = [get_model_prediction(model, base_data[:,i,:,:,:], device, config) for i in range(4)]
