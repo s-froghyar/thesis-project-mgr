@@ -21,7 +21,7 @@ def test_model(model, config, reporter, device, loader, epoch):
     with torch.no_grad():
         for batch_idx, (base_data, targets) in enumerate(loader):
             preds = [get_model_prediction(model, base_data[:,i,:,:,:], device, config) for i in range(4)]
-            final_predictions = get_final_preds(preds)
+            final_predictions = get_final_preds(preds, device)
 
             reporter.record_tta(final_predictions.to(device), targets.to(device))
 
