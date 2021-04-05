@@ -6,9 +6,9 @@ from .augerino import *
 from .tp import *
 
 
-def get_final_preds(all_preds):
+def get_final_preds(all_preds, device):
     bs = all_preds[0].shape[0]
-    out = torch.from_numpy(np.zeros((bs, 10))).to(dtype=torch.float32)
+    out = torch.from_numpy(np.zeros((bs, 10))).to(dtype=torch.float32, device=device)
     for pred in all_preds:
         out += pred
     return torch.div(out, 4)
