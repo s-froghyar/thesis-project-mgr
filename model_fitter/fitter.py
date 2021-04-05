@@ -98,8 +98,8 @@ class ModelFitter:
         elif self.model_config.aug_params.transform_chosen == 'ni': chosen_augs = [GaussianNoiseAug()]
         else: chosen_augs = [GaussianNoiseAug(), PitchShiftAug()]
 
-        aug = nn.Sequential(*tuple(chosen_augs), *self.spectrogram_transform)
-        self.model_config.model = AugAveragedModel(net, aug, get_model_prediction)
+        aug = nn.Sequential(*tuple(chosen_augs), *self.spectrogram_transform).to(device=self.device)
+        self.model_config.model = AugAveragedModel(net, aug, get_model_prediction).to(device=self.device)
 
         out_optimizer = self.model_config.optimizer(self.model_config.model.parameters(), lr=self.model_config.lr)
         return self.model_config.model, out_optimizer
