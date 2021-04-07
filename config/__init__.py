@@ -19,9 +19,9 @@ class CNNconfig:
 
     dataset_params = dict(
         frames=256,
-        bands=256,
+        bands=128,
         window_size=1024,
-        hop_size=1024,
+        hop_size=256,
         e0=1e-3
     )
     mel_spec_transform = aud_transforms.MelSpectrogram(
@@ -69,4 +69,5 @@ class AugerinoCNNconfig(CNNconfig):
     segmented = True
     is_tangent_prop = False
     augerino = True
+    optimzer = optim.SGD
 

@@ -50,7 +50,7 @@ class GtzanPath:
     def __getitem__(self, index):
         return self.train_x[index]
     def give_report(self):
-        print("Data Augmentation is completed with results:")
+        # print("Data Augmentation is completed with results:")
         print(f"Training samples: {len(self.train_x)}")
         print(f"Testing samples: {len(self.test_x)}")
     def get_metadata(self):

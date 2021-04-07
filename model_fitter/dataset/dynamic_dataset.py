@@ -66,6 +66,7 @@ class GtzanDynamicDataset(Dataset):
     def __getitem__(self, index):
         path = self.X[index]
         wave_data = self.load_audio(path)
+
         if self.model_type == 'augerino':
             return (
                 wave_data[:465984].clone().detach().requires_grad_(True),
@@ -104,9 +105,12 @@ class GtzanDynamicDataset(Dataset):
             wd = torch.from_numpy(wd[:465984])
         else:
             wd = wd[:465984]
-        mel_spec = self.mel_spec_transform(wd).to(self.device) # 456 width
-        patches = torch.split(mel_spec, 76, dim=1)
-        return torch.stack(patches)
+
+        patches = self.splitsongs(wd)
+        mel_specs = [self.mel_spec_transform(patch).to(self.device) for patch in patches] # 456 width
+
+        # patches = torch.split(mel_spec, 76, dim=1)
+        return torch.stack(mel_specs)
 
     def load_audio(self, path):
         ''' Loads wave data from given path and resamples it to 16000Hz '''
@@ -115,3 +119,22 @@ class GtzanDynamicDataset(Dataset):
         return resampler(wd).squeeze()
     def transform(self, x):
         return self.mel_spec_transform(x)
+    
+    def splitsongs(self, wd, overlap = 0.5):
+        temp_X = []
+
+        # Get the input song array size
+        xshape = wd.shape[0]
+        chunk = 33000
+        offset = int(chunk*(1.-overlap))
+        
+        # Split the song and create new ones on windows
+        spsong = [wd[i:i+chunk] for i in range(0, xshape - chunk + offset, offset)]
+        for s in spsong:
+            if s.shape[0] != chunk:
+                continue
+
+            temp_X.append(s)
+
+        return np.array(temp_X)
+
