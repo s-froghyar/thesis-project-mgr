@@ -26,7 +26,7 @@ def get_data_frame(data_path, is_local):
     else:
         temp_df = pd.read_csv(f"{data_path}/features_30_sec.csv")
 
-    temp_df['filePath'] = data_path + '/' + temp_df['label'] + '/' + temp_df['filename']
+    temp_df['filePath'] = data_path + '/WAV/' + temp_df['label'] + '/norm/' + temp_df['filename'].str[:-2] + 'wav'
 
     ids = copy.deepcopy(temp_df['filename'])
 

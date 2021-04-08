@@ -29,7 +29,6 @@ def get_model_prediction(model, batch_specs, device, model_type):
     preds_sum = torch.from_numpy(np.zeros((batch_specs.shape[0], 10))).to(dtype=torch.float32, device=device)
     for i in range(27):
         strip_data = batch_specs[:,i,:,:]
-        strip_data.requires_grad_(True)
         preds = model(strip_data)
         preds_sum += preds.to(dtype=torch.float32, device=device)
     return preds_sum.div(27)

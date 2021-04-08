@@ -10,14 +10,14 @@ class SegmentedCNN(nn.Module):
 
         self.fc1 = nn.Linear(64*30*30, 10)
         self.pool = F.max_pool2d
+        self.dropout = nn.Dropout(p=0.5)
         
     def forward(self, x):
+        inp = x
         x = x.unsqueeze(1)
         x = F.relu(self.pool(self.conv1(x), 2))
         x = F.relu(self.pool(self.conv2(x), 2))
-        # print(x.shape)
         x = x.reshape(x.shape[0], -1)
-        # print(x.shape)
-        x = self.fc1(x)
+        x = self.dropout(F.relu(self.fc1(x)))
 
         return F.softmax(x)

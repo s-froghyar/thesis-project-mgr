@@ -16,10 +16,8 @@ class AugAveragedModel(nn.Module):
             
             # patches = torch.split(full_spec, 76, dim=2)
             # split_specs = torch.stack(patches).permute(1,0,2,3)
-            print(x.shape)
             patches = splitsongs(x)
             mel_specs = [self.aug(patch) for patch in patches] # 456 width
-            print(len(mel_specs))
             split_specs = torch.stack(mel_specs)
             preds_sum = torch.from_numpy(np.zeros((split_specs.shape[0], 10))).to(dtype=torch.float32, device=self.device)
 

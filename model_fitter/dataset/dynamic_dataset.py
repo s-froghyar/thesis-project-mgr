@@ -56,8 +56,8 @@ class GtzanDynamicDataset(Dataset):
                         n_mels=mel_spec_params["bands"],
                         n_fft=mel_spec_params["window_size"],
                         hop_length=mel_spec_params["hop_size"]
-                ),
-                aud_transforms.AmplitudeToDB()
+                )
+                # aud_transforms.AmplitudeToDB()
             )
             
 
@@ -65,6 +65,7 @@ class GtzanDynamicDataset(Dataset):
         
     def __getitem__(self, index):
         path = self.X[index]
+        # print(path)
         wave_data = self.load_audio(path)
 
         if self.model_type == 'augerino':
