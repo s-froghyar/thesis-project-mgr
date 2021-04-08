@@ -23,7 +23,8 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
         for i in range(n_augs):
             data = get_batch_data(base_data, config.model_type, i)
             predictions = get_model_prediction(model, data, device, config.model_type)
-            
+            print(predictions)
+            print(targets)
 
             loss, tp_loss, augerino_loss = get_model_loss(  model,
                                                             predictions,

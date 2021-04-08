@@ -58,3 +58,10 @@ class PitchShiftAug(nn.Module):
         for index, row in enumerate(x):
             out[index] = librosa.effects.pitch_shift(row.detach().numpy(), BASE_SAMPLE_RATE, (1 + factor[index]))
         return torch.from_numpy(out).to(self.lims.device)
+
+
+def speedx(signal, factor):
+    """ Multiplies the sound's speed by some `factor` """
+    indices = torch.round( torch.range(0, len(signal), factor) )
+    indices = indices[indices < len(signal)]
+    return sound_array[ indices ]

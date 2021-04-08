@@ -84,7 +84,7 @@ class ModelFitter:
         if self.model_config.augerino:
             return self.init_augerino_model()
         out_model = self.model_config.model().to(device=self.device, dtype=torch.float32)
-        out_model.apply(init_layer)
+        # out_model.apply(init_layer)
         
         out_optimizer = self.model_config.optimizer(out_model.parameters(), weight_decay=self.model_config.weight_decay, lr=self.model_config.lr)
         return out_model, out_optimizer

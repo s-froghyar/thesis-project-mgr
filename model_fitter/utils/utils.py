@@ -24,16 +24,15 @@ def generate_batch_of_spectrograms(data, config, device):
 
 def get_model_prediction(model, batch_specs, device, model_type):
     ''' Gets the sum of the predictions for the 6 patches of the spectrogram '''
-    if model_type == 'augerino':
+    if model_type == 'augerino': # [batch size, num_of_patches, w,h]`
         return model(batch_specs)
-    print(batch_specs.shape)
     preds_sum = torch.from_numpy(np.zeros((batch_specs.shape[0], 10))).to(dtype=torch.float32, device=device)
     for i in range(27):
         strip_data = batch_specs[:,i,:,:]
         strip_data.requires_grad_(True)
         preds = model(strip_data)
         preds_sum += preds.to(dtype=torch.float32, device=device)
-    return preds_sum
+    return preds_sum.div(27)
 
 
 def get_model_loss(model, predictions, targets, config, device, x=None, transformed_data=None):

@@ -20,4 +20,4 @@ class SegmentedCNN(nn.Module):
         # print(x.shape)
         x = self.fc1(x)
 
-        return x
+        return F.softmax(x)

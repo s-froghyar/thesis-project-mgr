@@ -6,7 +6,7 @@ import torchaudio.transforms as aud_transforms
 import librosa
 import numpy as np
 
-from .dataset_utils import BASE_SAMPLE_RATE, generate_6_strips
+from .dataset_utils import BASE_SAMPLE_RATE
 from .transformations import gaussian_noise_injection, pitch_shift
 
 torchaudio.set_audio_backend("sox_io")
