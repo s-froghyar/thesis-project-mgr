@@ -2,7 +2,6 @@ from torch import nn
 import numpy as np
 import torch
 import torchaudio.transforms as aud_transforms
-import librosa.display as libdisp
 
 from .utils import *
 from .tp import get_tp_loss
@@ -23,19 +22,15 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
 
         for i in range(n_augs):
 
-            # data = get_batch_data(base_data, config.model_type, i)
-            predictions = get_model_prediction(model, base_data[:,i,:,:], device, config.model_type)
-            # print(predictions)
-            # print(targets)
-
-            # libdisp.specshow(data[0,0,:,:])
+            data = get_batch_data(base_data, config.model_type, i)
+            predictions = get_model_prediction(model, data, device, config.model_type)
 
             loss, tp_loss, augerino_loss = get_model_loss(  model,
                                                             predictions,
                                                             targets,
                                                             config,
                                                             device,
-                                                            x=base_data,
+                                                            x=data,
                                                             transformed_data=transformed_data)
             reporter.record_batch_data(predictions, targets, (loss, tp_loss, augerino_loss))
             # backward
