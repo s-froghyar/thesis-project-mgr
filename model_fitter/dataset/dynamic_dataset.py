@@ -79,14 +79,14 @@ class GtzanDynamicDataset(Dataset):
         if self.model_type == 'tp':
             return  (
                 self.get_6_spectrograms(wave_data),
-                self.get_6_spectrograms(self.augmentations[aug_type](wave_data, self.e0)),
+                self.get_6_spectrograms(self.augmentations[aug_type](wave_data, self.e0, True)),
                 self.targets[index]
             )
         else:
             aug_options = self.aug_params.get_options_of_chosen_transform()
             augs = []
             for aug_factor in aug_options:
-                augmented_wd = self.augmentations[aug_type](wave_data, aug_factor)
+                augmented_wd = self.augmentations[aug_type](wave_data, aug_factor, False)
                 augs.append(
                     self.get_6_spectrograms(augmented_wd)
                 )

@@ -5,7 +5,7 @@ import numpy as np
 def apply_all_audio_transformations(x, e0):
     return gaussian_noise_injection(pitch_shift(x, e0), e0)
 
-def gaussian_noise_injection(x, snr):
+def gaussian_noise_injection(x, snr, is_tp):
     g_noise = np.random.randn(len(x))
 
     noise_power = np.mean(np.power(g_noise, 2))
@@ -16,5 +16,6 @@ def gaussian_noise_injection(x, snr):
 
     return x + np.sqrt(noise_factor) * g_noise
 
-def pitch_shift(x, factor):
-    return librosa.effects.pitch_shift(x.squeeze().numpy(), BASE_SAMPLE_RATE, factor * 100)
+def pitch_shift(x, factor, is_tp):
+    if is_tp: factor = factor * 100
+    return librosa.effects.pitch_shift(x.squeeze().numpy(), BASE_SAMPLE_RATE, factor)
