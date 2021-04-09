@@ -4,11 +4,11 @@ import torchaudio.transforms as aud_transforms
 import torch
 import torch.optim as optim
 class CNNconfig:
-    batch_size = 64
+    batch_size = 16
     epochs = 10
     lr = 0.01
     seed = 1
-    log_interval = 10
+    log_interval = 1
     save_model = True
     loss = torch.nn.CrossEntropyLoss()
     segmented = False
@@ -69,5 +69,4 @@ class AugerinoCNNconfig(CNNconfig):
     segmented = True
     is_tangent_prop = False
     augerino = True
-    # optimzer = optim.SGD
 
