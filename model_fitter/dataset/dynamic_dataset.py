@@ -65,12 +65,11 @@ class GtzanDynamicDataset(Dataset):
         
     def __getitem__(self, index):
         path = self.X[index]
-        # print(path)
         wave_data = self.load_audio(path)
 
         if self.model_type == 'augerino':
             return (
-                wave_data[:465984].clone().detach().requires_grad_(True),
+                wave_data[:478912].clone().detach().requires_grad_(True),
                 [],
                 self.targets[index])
         
@@ -78,8 +77,8 @@ class GtzanDynamicDataset(Dataset):
         
         if self.model_type == 'tp':
             return  (
-                self.get_6_spectrograms(wave_data),
-                self.get_6_spectrograms(self.augmentations[aug_type](wave_data, self.e0, True)),
+                self.get_12_spectrograms(wave_data),
+                self.get_12_spectrograms(self.augmentations[aug_type](wave_data, self.e0, True)),
                 self.targets[index]
             )
         else:
@@ -88,7 +87,7 @@ class GtzanDynamicDataset(Dataset):
             for aug_factor in aug_options:
                 augmented_wd = self.augmentations[aug_type](wave_data, aug_factor, False)
                 augs.append(
-                    self.get_6_spectrograms(augmented_wd)
+                    self.get_12_spectrograms(augmented_wd)
                 )
             return (
                 torch.stack(augs),
@@ -100,15 +99,15 @@ class GtzanDynamicDataset(Dataset):
     def __len__(self):
         return len(self.X)
 
-    def get_6_spectrograms(self, wd):
+    def get_12_spectrograms(self, wd):
         ''' Transforms wave data to Melspectrogram and returns 6 (256x76) shaped patches '''
         if isinstance(wd, np.ndarray):
-            wd = torch.from_numpy(wd[:465984])
+            wd = torch.from_numpy(wd[:478912])
         else:
-            wd = wd[:465984]
+            wd = wd[:478912]
 
         patches = self.splitsongs(wd)
-        mel_specs = [self.mel_spec_transform(patch).to(self.device) for patch in patches] # 456 width
+        mel_specs = [self.mel_spec_transform(patch).to(self.device) for patch in patches]
 
         # patches = torch.split(mel_spec, 76, dim=1)
         return torch.stack(mel_specs)
@@ -121,12 +120,12 @@ class GtzanDynamicDataset(Dataset):
     def transform(self, x):
         return self.mel_spec_transform(x)
     
-    def splitsongs(self, wd, overlap = 0.5):
+    def splitsongs(self, wd, overlap = 0.25):
         temp_X = []
 
         # Get the input song array size
         xshape = wd.shape[0]
-        chunk = 33000
+        chunk = 48000 # min wave arr len is 478.912 --> 12 chunks (128x188) with overlap
         offset = int(chunk*(1.-overlap))
         
         # Split the song and create new ones on windows
@@ -138,4 +137,3 @@ class GtzanDynamicDataset(Dataset):
             temp_X.append(s)
 
         return np.array(temp_X)
-

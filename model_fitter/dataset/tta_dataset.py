@@ -55,8 +55,8 @@ class GtzanTTADataset(Dataset):
                     n_mels=mel_spec_params["bands"],
                     n_fft=mel_spec_params["window_size"],
                     hop_length=mel_spec_params["hop_size"]
-            ),
-            aud_transforms.AmplitudeToDB()
+            )
+            # aud_transforms.AmplitudeToDB()
         )
             
 
@@ -71,9 +71,9 @@ class GtzanTTADataset(Dataset):
 
         augs = []
         for aug_factor in aug_options:
-            augmented_wd = self.augmentations[aug_type](wave_data, aug_factor)
+            augmented_wd = self.augmentations[aug_type](wave_data, aug_factor, False)
             augs.append(
-                self.get_6_spectrograms(augmented_wd)
+                self.get_12_spectrograms(augmented_wd)
             )
         return (torch.stack(augs), self.targets[index])
 
@@ -81,16 +81,15 @@ class GtzanTTADataset(Dataset):
     def __len__(self):
         return len(self.X)
 
-    def get_6_spectrograms(self, wd):
+    def get_12_spectrograms(self, wd):
         ''' Transforms wave data to Melspectrogram and returns 6 (256x76) shaped patches '''
         if isinstance(wd, np.ndarray):
-            wd = torch.from_numpy(wd[:465984])
+            wd = torch.from_numpy(wd[:478912])
         else:
-            wd = wd[:465984]
-        # mel_spec = self.mel_spec_transform(wd).to(self.device) # 456 width
-        # patches = torch.split(mel_spec, 76, dim=1)
+            wd = wd[:478912]
+
         patches = self.splitsongs(wd)
-        mel_specs = [self.mel_spec_transform(patch).to(self.device) for patch in patches] # 456 width
+        mel_specs = [self.mel_spec_transform(patch).to(self.device) for patch in patches]
 
         return torch.stack(mel_specs)
 
@@ -106,7 +105,7 @@ class GtzanTTADataset(Dataset):
 
         # Get the input song array size
         xshape = wd.shape[0]
-        chunk = 33000
+        chunk = 48000 # min wave arr len is 478.912 --> 12 chunks (128x188) with overlap
         offset = int(chunk*(1.-overlap))
         
         # Split the song and create new ones on windows

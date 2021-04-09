@@ -23,15 +23,15 @@ def generate_batch_of_spectrograms(data, config, device):
     return batch_specs.to(dtype=torch.float32, device=device)
 
 def get_model_prediction(model, batch_specs, device, model_type):
-    ''' Gets the sum of the predictions for the 6 patches of the spectrogram '''
-    if model_type == 'augerino': # [batch size, num_of_patches, w,h]`
+    ''' Gets the sum of the predictions for the 12 patches of the spectrogram '''
+    if model_type == 'augerino':
         return model(batch_specs)
     preds_sum = torch.from_numpy(np.zeros((batch_specs.shape[0], 10))).to(dtype=torch.float32, device=device)
-    for i in range(27):
+    for i in range(12):
         strip_data = batch_specs[:,i,:,:]
         preds = model(strip_data)
         preds_sum += preds.to(dtype=torch.float32, device=device)
-    return preds_sum.div(27)
+    return preds_sum.div(12)
 
 
 def get_model_loss(model, predictions, targets, config, device, x=None, transformed_data=None):
@@ -42,9 +42,9 @@ def get_model_loss(model, predictions, targets, config, device, x=None, transfor
     augerino_loss = 0
 
     if config.is_tangent_prop:
-        for i in range(27):
+        for i in range(12):
             tp_loss += config.gamma * get_tp_loss(x[:,i,:,:], predictions, config.e0, device, transformed_data[:,i,:,:], model)
-            tp_loss = tp_loss / 27
+            tp_loss = tp_loss / 12
     elif config.augerino:
         augerino_loss = unif_aug_loss(model.aug)
     

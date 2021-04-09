@@ -9,7 +9,6 @@ from .augerino import unif_aug_loss, GaussianNoiseAug, PitchShiftAug
 
 def train_model(model, config, reporter, device, loader, optimizer, epoch):
     model.train()
-    # print(f"parameters: {list(model.parameters())}")
     for batch_idx, (base_data, transformed_data, targets) in enumerate(loader):
         if config.is_tangent_prop:
             base_data.requires_grad = True

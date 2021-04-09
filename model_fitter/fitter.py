@@ -5,6 +5,7 @@ import time
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchaudio.transforms as aud_transforms
+import gc
 
 class ModelFitter:
     def __init__(self, args, model_config, device, kwargs, reporter):
@@ -39,6 +40,9 @@ class ModelFitter:
             if epoch % 5 == 0:
                 self.reporter.save_model(model, epoch)
                 self.reporter.save_metrics(epoch)
+            
+            gc.collect()
+            torch.cuda.empty_cache()
         self.reporter.save_model(model, 'final')
         self.reporter.save_metrics('final')
 
