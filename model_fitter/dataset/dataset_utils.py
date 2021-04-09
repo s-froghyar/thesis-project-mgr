@@ -23,10 +23,10 @@ def get_data_frame(data_path, is_local):
     temp_df = None
     if is_local:
         temp_df = pd.read_csv(f"{data_path}/test.csv")
+        temp_df['filePath'] = data_path + '/WAV/' + temp_df['label'] + '/norm/' + temp_df['filename'].str[:-2] + 'wav'
     else:
         temp_df = pd.read_csv(f"{data_path}/features_30_sec.csv")
-
-    temp_df['filePath'] = data_path + '/' + temp_df['label'] + '/norm/' + temp_df['filename'].str[:-2] + 'wav'
+        temp_df['filePath'] = data_path + '/' + temp_df['label'] + '/norm/' + temp_df['filename'].str[:-2] + 'wav'
 
     ids = copy.deepcopy(temp_df['filename'])
 

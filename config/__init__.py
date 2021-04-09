@@ -58,6 +58,7 @@ class SegmentedCNNconfig(CNNconfig):
 
 class TpCNNconfig(CNNconfig):
     model_type = 'tp'
+    batch_size = 4
     gamma = 0.0005
     e0=1e-3
     segmented = False

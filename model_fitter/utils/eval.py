@@ -34,7 +34,7 @@ def test_model(model, config, reporter, device, loader, epoch):
             if all_targets is None:
                 all_targets = targets
             else:
-                all_targets = torch.vstack((all_targets, targets))
+                all_targets = torch.cat((all_targets, targets))
 
     return all_predictions, all_targets
 

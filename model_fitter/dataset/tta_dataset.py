@@ -100,7 +100,7 @@ class GtzanTTADataset(Dataset):
         return resampler(wd).squeeze()
     def transform(self, x):
         return self.mel_spec_transform(x)
-    def splitsongs(self, wd, overlap = 0.5):
+    def splitsongs(self, wd, overlap = 0.25):
         temp_X = []
 
         # Get the input song array size
