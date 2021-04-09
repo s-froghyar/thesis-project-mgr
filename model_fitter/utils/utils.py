@@ -44,7 +44,7 @@ def get_model_loss(model, predictions, targets, config, device, x=None, transfor
     if config.is_tangent_prop:
         for i in range(12):
             tp_loss += config.gamma * get_tp_loss(x[:,i,:,:], predictions, config.e0, device, transformed_data[:,i,:,:], model)
-            tp_loss = tp_loss / 12
+        tp_loss = tp_loss / 12
     elif config.augerino:
         augerino_loss = unif_aug_loss(model.aug)
     

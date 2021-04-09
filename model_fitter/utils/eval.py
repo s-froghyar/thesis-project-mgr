@@ -33,7 +33,8 @@ def test_model(model, config, reporter, device, loader, epoch):
                 all_targets = targets
             else:
                 all_targets = torch.vstack((all_targets, targets))
-        reporter.save_predictions_for_cm(all_predictions, all_targets, epoch)
+                
+    return all_predictions, all_targets
 
 
 def report_on_model(self):

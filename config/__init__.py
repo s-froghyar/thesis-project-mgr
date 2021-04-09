@@ -4,7 +4,7 @@ import torchaudio.transforms as aud_transforms
 import torch
 import torch.optim as optim
 class CNNconfig:
-    batch_size = 5
+    batch_size = 64
     epochs = 10
     lr = 0.01
     seed = 1

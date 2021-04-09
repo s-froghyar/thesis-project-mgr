@@ -29,7 +29,9 @@ def main():
     print('Grabbing model_config')
     config = model_configs[config_name]
     config.local = args.local
-    if args.local: config.epochs = 5
+    if args.local:
+        config.epochs = 5
+        config.batch_size = 5
 
     config.aug_params.set_chosen_transform(args.transform)
 
