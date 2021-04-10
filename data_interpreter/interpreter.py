@@ -10,8 +10,8 @@ parser = argparse.ArgumentParser(description='Plot confusion matrix')
 parser.add_argument('--epoch', '-e', required=True, choices=[str(x) for x in range(100)], help='The epoch checkpoint to display')
 
 def main():
-    date = '2021-04-09'
-    run_id = '47'
+    date = '2021-04-10'
+    run_id = '1'
     
     args = parser.parse_args()
     run_path = f"{date}/run_{run_id}"
