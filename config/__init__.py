@@ -10,7 +10,7 @@ class CNNconfig:
     seed = 1
     log_interval = 1
     save_model = True
-    loss = torch.nn.CrossEntropyLoss()
+    loss = torch.nn.NLLLoss()
     segmented = False
     test_size = 0.2
     BASE_SAMPLE_RATE = 16000
