@@ -121,12 +121,12 @@ class GtzanDynamicDataset(Dataset):
     def transform(self, x):
         return self.mel_spec_transform(x)
     
-    def splitsongs(self, wd, overlap = 0.0):
+    def splitsongs(self, wd, overlap = 0.25):
         temp_X = []
 
         # Get the input song array size
         xshape = wd.shape[0]
-        chunk = 10000 # min wave arr len is 478.912 --> 12 chunks (128x188) with overlap (48000)
+        chunk = 48000 # min wave arr len is 478.912 --> 12 chunks (128x188) with overlap (48000)
         offset = int(chunk*(1.-overlap))
         
         # Split the song and create new ones on windows

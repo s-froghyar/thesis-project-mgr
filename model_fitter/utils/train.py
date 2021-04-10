@@ -10,7 +10,7 @@ from .augerino import unif_aug_loss, GaussianNoiseAug, PitchShiftAug
 def train_model(model, config, reporter, device, loader, optimizer, epoch):
     model.train()
     for batch_idx, (base_data, transformed_data, targets) in enumerate(loader):
-        print(f"targets: {targets}")
+        print(f"targets[0]: {targets[0]}")
         if config.is_tangent_prop:
             base_data.requires_grad = True
         targets = targets.to(device)
@@ -23,7 +23,7 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
         for i in range(n_augs):
             data = get_batch_data(base_data, config.model_type, i).to(device)
             predictions = get_model_prediction(model, data, device, config.model_type)
-            print(f"predictions: {predictions}")
+            print(f"predictions[0]: {predictions[0]}")
             loss, tp_loss, augerino_loss = get_model_loss(  model,
                                                             predictions,
                                                             targets,

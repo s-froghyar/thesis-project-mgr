@@ -8,7 +8,7 @@ class SegmentedCNN(nn.Module):
         self.conv1 = nn.Conv2d(1, 64, kernel_size=5, stride=1, padding=(1, 1))
         self.conv2 = nn.Conv2d(64, 64, kernel_size=5, stride=1, padding=(1, 1))
 
-        self.fc1 = nn.Linear(15360, 500)
+        self.fc1 = nn.Linear(86400, 500)
         self.fc2 = nn.Linear(500, 10)
         nn.init.kaiming_normal_(self.fc1.weight, mode='fan_in')
         nn.init.kaiming_normal_(self.fc2.weight, mode='fan_in')
