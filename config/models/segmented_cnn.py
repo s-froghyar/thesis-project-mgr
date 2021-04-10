@@ -26,4 +26,4 @@ class SegmentedCNN(nn.Module):
         x = self.dropout(F.relu(self.fc1(x)))
         x = self.fc2(x)
 
-        return self.log_sm(x)
+        return x

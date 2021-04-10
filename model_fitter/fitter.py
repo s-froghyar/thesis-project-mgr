@@ -66,7 +66,8 @@ class ModelFitter:
                 train           = True,
                 model_type        = self.model_config.model_type
             ), 
-            batch_size=self.model_config.batch_size
+            batch_size=self.model_config.batch_size,
+            shuffle=True
         )
 
         test_loader = DataLoader(
@@ -80,7 +81,7 @@ class ModelFitter:
                 tta_settings    = self.model_config.tta_settings[self.model_config.aug_params.transform_chosen]
             ),
             batch_size=self.model_config.batch_size,
-            shuffle=True
+            shuffle=False
         )
         self.reporter.keep_log(str(GTZAN.get_metadata()))
         return train_loader, test_loader, GTZAN.get_metadata()
