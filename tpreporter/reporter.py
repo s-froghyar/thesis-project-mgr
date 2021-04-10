@@ -31,7 +31,7 @@ class Reporter():
                 b) report on model to generate confusion matrices and accuracies
                     # train_num_correct, test_num_correct = reporter.report_on_model()
     """
-    def __init__(self, name, config, save_directory):
+    def __init__(self, name, config, save_directory, optim_message):
         if name not in possible_names:
             raise ValueError('name is not recognized from possible experiment names')
         
@@ -57,6 +57,7 @@ class Reporter():
             Reporter started with params:
             name: {self.name}
             log_path: {self.log_path}
+            Optimizing for: {optim_message}
             '''
         )
 

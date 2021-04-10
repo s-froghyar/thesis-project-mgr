@@ -18,7 +18,7 @@ parser.add_argument('--data-path', '-d', required=True, help='The path to the da
 parser.add_argument('--transform', '-t', required=True, choices=['ni', 'ps'], help='The audio transformation to use')
 parser.add_argument('--local', '-l', action='store_true', help='Don\'t use GPU and use carriage return for logging')
 parser.add_argument('--checkpoint', default='checkpoints', help='the path to save checkpointed models to')
-parser.add_argument('--crossval', action='store_true', help='Enable crossvalidation')
+parser.add_argument('--title', default='Straight learning', help='Enable crossvalidation')
 parser.add_argument('--test-only', default=False, action='store_true', help='Load the saved models from a training round and perform evaluation')
 
 def main():
@@ -48,7 +48,7 @@ def main():
 
     print(f'Save directory: {save_directory}')
 
-    reporter = Reporter(config_name, config, save_directory)
+    reporter = Reporter(config_name, config, save_directory, args.title)
 
     model_fitter = ModelFitter(args, config, device, kwargs, reporter)
 
