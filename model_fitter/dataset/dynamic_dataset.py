@@ -107,6 +107,7 @@ class GtzanDynamicDataset(Dataset):
             wd = wd[:478912]
 
         patches = self.splitsongs(wd)
+
         mel_specs = [self.mel_spec_transform(patch).to(self.device) for patch in patches]
 
         # patches = torch.split(mel_spec, 76, dim=1)
@@ -120,12 +121,12 @@ class GtzanDynamicDataset(Dataset):
     def transform(self, x):
         return self.mel_spec_transform(x)
     
-    def splitsongs(self, wd, overlap = 0.25):
+    def splitsongs(self, wd, overlap = 0.0):
         temp_X = []
 
         # Get the input song array size
         xshape = wd.shape[0]
-        chunk = 48000 # min wave arr len is 478.912 --> 12 chunks (128x188) with overlap
+        chunk = 10000 # min wave arr len is 478.912 --> 12 chunks (128x188) with overlap (48000)
         offset = int(chunk*(1.-overlap))
         
         # Split the song and create new ones on windows
@@ -136,4 +137,4 @@ class GtzanDynamicDataset(Dataset):
 
             temp_X.append(s)
 
-        return np.array(temp_X)
+        return temp_X

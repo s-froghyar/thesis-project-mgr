@@ -11,13 +11,16 @@ parser.add_argument('--epoch', '-e', required=True, choices=[str(x) for x in ran
 
 def main():
     date = '2021-04-09'
-    run_id = '7'
+    run_id = '47'
     
     args = parser.parse_args()
     run_path = f"{date}/run_{run_id}"
 
     cm = load_confusion_matrix(run_path, args.epoch)
-
+    print(len(cm['predictions']))
+    print(cm['predictions'].shape)
+    print(cm['targets'].shape)
+    print(len(cm['targets']))
     print(cm['predictions'][0])
     print(cm['targets'][0])
     
@@ -27,7 +30,7 @@ def main():
     cm = confusion_matrix(cm['targets'], cm['predictions'])
     plot_confusion_matrix(cm, normalize=False)
 
-    metrics = torch.load(f"{run_path}/model_metrics_efinal", map_location=torch.device('cpu'))#{args.epoch}
+    metrics = torch.load(f"{run_path}/model_metrics_e{args.epoch}", map_location=torch.device('cpu'))#{args.epoch}
     plt.plot(metrics["epoch_losses"])
     plt.show()
 

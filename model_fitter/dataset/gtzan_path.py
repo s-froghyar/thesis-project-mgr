@@ -16,12 +16,14 @@ class GtzanPath:
     """
     def __init__(
         self,
-        df,
+        dfs,
         test_size=0.1,
     ):
-        init_x, init_test_x, init_y, init_test_y = train_test_split(df['filePath'],
-                                                                df['label'],
-                                                                test_size=test_size)
+        init_x = dfs['train']['filePath']
+        init_y = dfs['train']['label']
+        init_test_x = dfs['test']['filePath']
+        init_test_y = dfs['test']['label']
+
         self.set_up_test_data(init_test_x, init_test_y)
         self.set_up_train_data(init_x, init_y)
         self.give_report()
@@ -65,26 +67,25 @@ def load_path_data(data_path, test_size=0.2, is_local=True):
         Returns tuple of (GtzanPath object, number of audio files, first_wave tuple=())
     '''
     test_file_path = ""
-    num_of_data = 0
     gtzan_waves_path = None
 
     test_file_path = f"{data_path}/gtzan_dynamic_test"
     test_file_exists = os.path.isfile(test_file_path)
     
     if is_local:
-        df, num_of_data = get_data_frame(data_path, True)
+        dfs = get_data_frame(data_path, True)
 
         if test_file_exists:
             gtzan_waves_path = load_test_data(test_file_path)
         else:
-            gtzan_waves_path = GtzanPath(df, test_size=test_size)
+            gtzan_waves_path = GtzanPath(dfs, test_size=test_size)
             save_test_data(test_file_path, gtzan_waves_path)
     else:
         print(f"Cluster execution - preparing data")
-        df, num_of_data = get_data_frame(data_path, False)
-        gtzan_waves_path = GtzanPath(df, test_size=test_size)
+        dfs = get_data_frame(data_path, False)
+        gtzan_waves_path = GtzanPath(dfs, test_size=test_size)
     
-    return gtzan_waves_path, num_of_data
+    return gtzan_waves_path
 
 
 def save_test_data(test_file_path, data):

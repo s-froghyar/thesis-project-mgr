@@ -30,8 +30,8 @@ def main():
     config = model_configs[config_name]
     config.local = args.local
     if args.local:
-        config.epochs = 5
-        config.batch_size = 5
+        config.epochs = 4
+        config.batch_size = 4
 
     config.aug_params.set_chosen_transform(args.transform)
 

@@ -13,7 +13,6 @@ def get_final_preds(all_preds, device):
         out += pred
     return torch.div(out, 4)
 
-    
 def generate_batch_of_spectrograms(data, config, device):
     batch_specs = torch.from_numpy(np.zeros((data.shape[0], 6, 256, 76)))
     for b in range(len(data)):
@@ -27,11 +26,12 @@ def get_model_prediction(model, batch_specs, device, model_type):
     if model_type == 'augerino':
         return model(batch_specs)
     preds_sum = torch.from_numpy(np.zeros((batch_specs.shape[0], 10))).to(dtype=torch.float32, device=device)
-    for i in range(12):
+    # preds_sum.requires_grad = False
+    for i in range(47):
         strip_data = batch_specs[:,i,:,:]
         preds = model(strip_data)
         preds_sum += preds.to(dtype=torch.float32, device=device)
-    return preds_sum.div(12)
+    return preds_sum
 
 
 def get_model_loss(model, predictions, targets, config, device, x=None, transformed_data=None):
@@ -45,15 +45,17 @@ def get_model_loss(model, predictions, targets, config, device, x=None, transfor
         for i in range(12):
             tp_loss += config.gamma * get_tp_loss(x[:,i,:,:], predictions, config.e0, device, transformed_data[:,i,:,:], model)
         tp_loss = tp_loss / 12
+        return torch.add(base_loss, tp_loss)
     elif config.augerino:
         augerino_loss = unif_aug_loss(model.aug)
-    
-    model_loss = torch.add(base_loss, tp_loss + augerino_loss)
-    return model_loss, tp_loss, augerino_loss
+        return torch.add(base_loss, augerino_loss)
+
+    return base_loss, tp_loss, augerino_loss
 
 def init_layer(layer):
     if type(layer) == nn.Conv2d:
         nn.init.kaiming_normal_(layer.weight, mode='fan_out', nonlinearity='relu')
+        layer.bias.data.fill_(0.01)
 
 def get_6_spectrograms(wd, config, device):
     patches = np.array_split(wd, 6)

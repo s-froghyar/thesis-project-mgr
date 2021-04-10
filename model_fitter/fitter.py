@@ -29,7 +29,7 @@ class ModelFitter:
 
     def fit(self): 
         model, optimizer = self.init_model()
-        train_loader, test_loader, data_count, metadata = self.get_data_loaders()
+        train_loader, test_loader, metadata = self.get_data_loaders()
 
         self.reporter.train_set_len = len(train_loader.dataset)
         
@@ -37,10 +37,10 @@ class ModelFitter:
             train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
             all_predictions, all_targets = test_model(model, self.model_config, self.reporter, self.device, test_loader, epoch)
             self.reporter.record_epoch_data(epoch)
-            if epoch % 5 == 0:
-                self.reporter.save_model(model, epoch)
-                self.reporter.save_metrics(epoch)
-                self.reporter.save_predictions_for_cm(all_predictions, all_targets, epoch)
+            # if epoch % 1 == 0:
+            self.reporter.save_model(model, epoch)
+            self.reporter.save_metrics(epoch)
+            self.reporter.save_predictions_for_cm(all_predictions, all_targets, epoch)
             
             gc.collect()
             torch.cuda.empty_cache()
@@ -51,7 +51,7 @@ class ModelFitter:
     def get_data_loaders(self):
         print("Loading in data...")
         
-        GTZAN, data_count = load_path_data(
+        GTZAN = load_path_data(
             self.args.data_path,
             test_size=self.model_config.test_size,
             is_local=self.args.local
@@ -83,13 +83,13 @@ class ModelFitter:
             shuffle=True
         )
         self.reporter.keep_log(str(GTZAN.get_metadata()))
-        return train_loader, test_loader, data_count, GTZAN.get_metadata()
+        return train_loader, test_loader, GTZAN.get_metadata()
 
     def init_model(self):
         if self.model_config.augerino:
             return self.init_augerino_model()
         out_model = self.model_config.model().to(device=self.device, dtype=torch.float32)
-        # out_model.apply(init_layer)
+        out_model.apply(init_layer)
         
         out_optimizer = self.model_config.optimizer(out_model.parameters(), weight_decay=self.model_config.weight_decay, lr=self.model_config.lr)
         return out_model, out_optimizer
