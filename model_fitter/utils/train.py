@@ -13,10 +13,9 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
     n_augs = 1
     if config.model_type == 'segmented':
         n_augs = len(config.aug_params.get_options_of_chosen_transform())
-        reporter.train_set_len = n_augs * reporter.train_set_len
+        reporter.train_set_len = n_augs * len(loader.dataset)
 
     for batch_idx, (base_data, transformed_data, targets) in enumerate(loader):
-        print(f"targets[0]: {targets[0]}")
         if config.is_tangent_prop:
             base_data.requires_grad = True
         targets = targets.to(device)
@@ -24,7 +23,6 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
         for i in range(n_augs):
             data = get_batch_data(base_data, config.model_type, i).to(device)
             predictions = get_model_prediction(model, data, device, config.model_type)
-            print(f"predictions[0]: {predictions[0]}")
             loss, tp_loss, augerino_loss = get_model_loss(  model,
                                                             predictions,
                                                             targets,

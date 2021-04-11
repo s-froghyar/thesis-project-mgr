@@ -44,8 +44,7 @@ class GtzanDynamicDataset(Dataset):
         self.augmentations = {
             'ni': gaussian_noise_injection,
             'ps': pitch_shift,
-            'none': lam
-
+            'none': lambda x,y,z: x
         }
         self.model_type = model_type
 

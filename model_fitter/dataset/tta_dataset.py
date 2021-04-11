@@ -44,7 +44,8 @@ class GtzanTTADataset(Dataset):
         self.tta = tta_settings
         self.augmentations = {
             'ni': gaussian_noise_injection,
-            'ps': pitch_shift
+            'ps': pitch_shift,
+            'none': lambda x,y,z: x
         }
 
         self.e0 = mel_spec_params["e0"]
@@ -56,7 +57,6 @@ class GtzanTTADataset(Dataset):
                     n_fft=mel_spec_params["window_size"],
                     hop_length=mel_spec_params["hop_size"]
             )
-            # aud_transforms.AmplitudeToDB()
         )
             
 
@@ -67,7 +67,7 @@ class GtzanTTADataset(Dataset):
         wave_data = self.load_audio(path)
 
         aug_type = self.aug_params.transform_chosen
-        aug_options = torch.rand(4, device=self.device) * (self.tta[1] - self.tta[0]) + self.tta[0]
+        aug_options = self.get_aug_options()
 
         augs = []
         for aug_factor in aug_options:
@@ -100,3 +100,7 @@ class GtzanTTADataset(Dataset):
         return resampler(wd).squeeze()
     def transform(self, x):
         return self.mel_spec_transform(x)
+    def get_aug_options(self):
+        if self.tta is None:
+            return [0]
+        return torch.rand(4, device=self.device) * (self.tta[1] - self.tta[0]) + self.tta[0]

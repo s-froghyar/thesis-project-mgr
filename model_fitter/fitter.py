@@ -23,7 +23,6 @@ class ModelFitter:
                     n_fft=dataset_params["window_size"],
                     hop_length=dataset_params["hop_size"]
                 )
-                # aud_transforms.AmplitudeToDB()
             )
 
 
@@ -37,10 +36,11 @@ class ModelFitter:
             train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
             all_predictions, all_targets = test_model(model, self.model_config, self.reporter, self.device, test_loader, epoch)
             self.reporter.record_epoch_data(epoch)
-            # if epoch % 1 == 0:
-            self.reporter.save_model(model, epoch)
-            self.reporter.save_metrics(epoch)
-            self.reporter.save_predictions_for_cm(all_predictions, all_targets, epoch)
+            
+            if (epoch + 1) % self.model_config.log_interval == 0:
+                self.reporter.save_model(model, epoch)
+                self.reporter.save_metrics(epoch)
+                self.reporter.save_predictions_for_cm(all_predictions, all_targets, epoch)
             
             gc.collect()
             torch.cuda.empty_cache()
