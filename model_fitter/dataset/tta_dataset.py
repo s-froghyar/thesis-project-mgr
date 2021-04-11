@@ -73,7 +73,7 @@ class GtzanTTADataset(Dataset):
         for aug_factor in aug_options:
             augmented_wd = self.augmentations[aug_type](wave_data, aug_factor, False)
             augs.append(
-                self.get_12_spectrograms(augmented_wd)
+                self.get_patched_spectrograms(augmented_wd)
             )
         return (torch.stack(augs), self.targets[index])
 
@@ -81,7 +81,7 @@ class GtzanTTADataset(Dataset):
     def __len__(self):
         return len(self.X)
 
-    def get_12_spectrograms(self, wd):
+    def get_patched_spectrograms(self, wd):
         ''' Transforms wave data to Melspectrogram and returns 6 (256x76) shaped patches '''
         if isinstance(wd, np.ndarray):
             wd = torch.from_numpy(wd[:478912])
