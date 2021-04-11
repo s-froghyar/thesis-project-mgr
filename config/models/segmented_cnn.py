@@ -5,10 +5,10 @@ import torch
 class SegmentedCNN(nn.Module):
     def __init__(self):
         super(SegmentedCNN, self).__init__()
-        self.conv1 = nn.Conv2d(1, 64, kernel_size=5, stride=1, padding=(1, 1))
-        self.conv2 = nn.Conv2d(64, 64, kernel_size=5, stride=1, padding=(1, 1))
+        self.conv1 = nn.Conv2d(1, 64, kernel_size=5, stride=1, padding=(2, 1))
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=5, stride=1, padding=(2, 1))
 
-        self.fc1 = nn.Linear(64 * 30 * 28, 500)
+        self.fc1 = nn.Linear(64 * 32 * 18, 500)
         self.fc2 = nn.Linear(500, 10)
         nn.init.kaiming_normal_(self.fc1.weight, mode='fan_in')
         nn.init.kaiming_normal_(self.fc2.weight, mode='fan_in')
