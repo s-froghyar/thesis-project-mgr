@@ -33,11 +33,12 @@ class CNNconfig:
 
     aug_params = AugmentationParameters(
         ni = (0.0, 0.2, 0.02),
-        ps = [-12, 0, 12]
+        ps = [-2, 0, 2]
     )
     tta_settings = {
         'ni': (0.0, 0.2),
-        'ps': (-12., 12.)
+        'ps': (-2., 2.),
+        'none': None
     }
     optimizer = optim.Adam
     weight_decay = 5e-4

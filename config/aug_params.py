@@ -19,7 +19,9 @@ class AugmentationParameters:
         )
     
     def get_options_of_chosen_transform(self):
-        if self.transform_chosen == 'ni':
+        if self.transform_chosen == 'none':
+            return [0]
+        elif self.transform_chosen == 'ni':
             return self.noise_injection
         else:
             return self.pitch_shift

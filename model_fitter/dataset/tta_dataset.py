@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 import librosa
 import numpy as np
 
-from .dataset_utils import BASE_SAMPLE_RATE, generate_6_strips
+from .dataset_utils import BASE_SAMPLE_RATE, splitsongs
 from .transformations import gaussian_noise_injection, pitch_shift
 
 torchaudio.set_audio_backend("sox_io")
@@ -88,7 +88,7 @@ class GtzanTTADataset(Dataset):
         else:
             wd = wd[:478912]
 
-        patches = self.splitsongs(wd)
+        patches = splitsongs(wd)
         mel_specs = [self.mel_spec_transform(patch).to(self.device) for patch in patches]
 
         return torch.stack(mel_specs)
@@ -100,20 +100,3 @@ class GtzanTTADataset(Dataset):
         return resampler(wd).squeeze()
     def transform(self, x):
         return self.mel_spec_transform(x)
-    def splitsongs(self, wd, overlap = 0.0):
-        temp_X = []
-
-        # Get the input song array size
-        xshape = wd.shape[0]
-        chunk = 20000 # min wave arr len is 478.912 --> 12 chunks (128x188) with overlap (48000)
-        offset = int(chunk*(1.-overlap))
-        
-        # Split the song and create new ones on windows
-        spsong = [wd[i:i+chunk] for i in range(0, xshape - chunk + offset, offset)]
-        for s in spsong:
-            if s.shape[0] != chunk:
-                continue
-
-            temp_X.append(s)
-
-        return temp_X
