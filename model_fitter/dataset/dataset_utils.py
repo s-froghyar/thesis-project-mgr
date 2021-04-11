@@ -42,7 +42,7 @@ def get_data_frame(data_path, is_local):
 
     return out
 
-def splitsongs(wd, overlap = 0.25):
+def splitsongs(wd, overlap = 0.0):
     temp_X = []
 
     # Get the input song array size
