@@ -37,18 +37,20 @@ def get_model_prediction(model, batch_specs, device, model_type):
 def get_model_loss(model, predictions, targets, config, device, x=None, transformed_data=None):
     ''' Gets the losses for the model. Returns tuple of (model_loss, tp_loss, augerino_loss) '''
     targets = targets.to(device)
+    num_of_patches = x.size(1)
+
     base_loss = config.loss(predictions, targets)
-    tp_loss = 0
-    augerino_loss = 0
+    tp_loss = 0.0
+    augerino_loss = 0.0
 
     if config.is_tangent_prop:
-        for i in range(23):
+        for i in range(num_of_patches):
             tp_loss += config.gamma * get_tp_loss(x[:,i,:,:], predictions, config.e0, device, transformed_data[:,i,:,:], model)
-        tp_loss = tp_loss / 12
-        return torch.add(base_loss, tp_loss)
+        tp_loss = tp_loss / num_of_patches
+        base_loss = base_loss + tp_loss
     elif config.augerino:
         augerino_loss = unif_aug_loss(model.aug)
-        return torch.add(base_loss, augerino_loss)
+        base_loss = base_loss + augerino_loss
 
     return base_loss, tp_loss, augerino_loss
 

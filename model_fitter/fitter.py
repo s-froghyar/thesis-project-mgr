@@ -97,7 +97,7 @@ class ModelFitter:
 
     def init_augerino_model(self):
         net = self.model_config.model().to(device=self.device, dtype=torch.float32)
-        # net.apply(init_layer)
+        net.apply(init_layer)
 
         chosen_augs = []
         if self.model_config.aug_params.transform_chosen == 'ps': chosen_augs = [PitchShiftAug()]
