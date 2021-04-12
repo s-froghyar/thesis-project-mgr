@@ -5,7 +5,7 @@ import torch
 import torch.optim as optim
 class CNNconfig:
     batch_size = 64
-    epochs = 10
+    epochs = 50
     lr = 0.0005
     seed = 1
     log_interval = 10
