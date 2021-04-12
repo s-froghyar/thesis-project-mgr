@@ -29,9 +29,9 @@ class AugAveragedModel(nn.Module):
             num_of_patches = x.size(1)
             all_specs = []
             for i in range(num_of_patches):
-                batch_of_patches = x[:,i,:]
-                augmentations = self.aug(batch_of_patches)
-                mel_specs = transform(augmentations)
+                batch_of_patches = x[:,i,:].to(self.device)
+                augmentations = self.aug(batch_of_patches).to(self.device)
+                mel_specs = transform(augmentations).to(self.device)
                 all_specs.append(mel_specs)
             all_specs = torch.stack(all_specs).permute((1,0,2,3))
             preds_sum = torch.from_numpy(np.zeros((all_specs.size(0), 10))).to(dtype=torch.float32, device=self.device)
