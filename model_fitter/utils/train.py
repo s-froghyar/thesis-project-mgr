@@ -2,6 +2,7 @@ from torch import nn
 import numpy as np
 import torch
 import torchaudio.transforms as aud_transforms
+import gc
 
 from .utils import *
 from .tp import get_tp_loss
@@ -44,6 +45,8 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
                     epoch, batch_idx * len(base_data), len(loader.dataset),
                     100. * batch_idx / len(loader), loss.item(), tp_loss, augerino_loss)
                 )
+                gc.collect()
+                torch.cuda.empty_cache()
     if config.model_type == 'augerino':
         print(f"limits: {model.aug.lims}")
 
