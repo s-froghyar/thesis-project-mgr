@@ -10,17 +10,21 @@ parser = argparse.ArgumentParser(description='Plot confusion matrix')
 parser.add_argument('--epoch', '-e', required=True, choices=[str(x) for x in range(100)], help='The epoch checkpoint to display')
 
 def main():
-    date = '2021-04-10'
+    run_type = 'no_aug'
     run_id = '1'
     
     args = parser.parse_args()
-    run_path = f"{date}/run_{run_id}"
+    run_path = f"{run_type}/run_{run_id}"
+    # run_path = "."
+
+    # cm = torch.load("25/confusion_matrix_e9", map_location=torch.device('cpu'))
+    # metrics = torch.load("25/model_metrics_efinal", map_location=torch.device('cpu'))#{args.epoch}
 
     cm = load_confusion_matrix(run_path, args.epoch)
-    print(len(cm['predictions']))
-    print(cm['predictions'].shape)
-    print(cm['targets'].shape)
-    print(len(cm['targets']))
+    # print(len(cm['predictions']))
+    # print(cm['predictions'].shape)
+    # print(cm['targets'].shape)
+    # print(len(cm['targets']))
     print(cm['predictions'][0])
     print(cm['targets'][0])
     
@@ -31,7 +35,10 @@ def main():
     plot_confusion_matrix(cm, normalize=False)
 
     metrics = torch.load(f"{run_path}/model_metrics_e{args.epoch}", map_location=torch.device('cpu'))#{args.epoch}
-    plt.plot(metrics["epoch_losses"])
+    print(metrics)
+    # plt.plot(metrics["epoch_losses"])
+    plt.plot(metrics["epoch_accuracies"])
+
     plt.show()
 
 def load_confusion_matrix(run_path, poch):

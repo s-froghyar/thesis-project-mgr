@@ -4,8 +4,8 @@ import torchaudio.transforms as aud_transforms
 import torch
 import torch.optim as optim
 class CNNconfig:
-    batch_size = 64
-    epochs = 50
+    batch_size = 16
+    epochs = 5
     lr = 0.0005
     seed = 1
     log_interval = 10
@@ -32,11 +32,11 @@ class CNNconfig:
             )
 
     aug_params = AugmentationParameters(
-        ni = (0.0, 0.2, 0.02),
+        ni = (None, 9, 12),
         ps = [-2, 0, 2]
     )
     tta_settings = {
-        'ni': (0.0, 0.2),
+        'ni': (9., 12.),
         'ps': (-2., 2.),
         'none': None
     }
