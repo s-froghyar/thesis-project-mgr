@@ -6,9 +6,9 @@ import torch.optim as optim
 class CNNconfig:
     batch_size = 64
     epochs = 10
-    lr = 0.001
+    lr = 0.0005
     seed = 1
-    log_interval = 1
+    log_interval = 10
     save_model = True
     loss = torch.nn.CrossEntropyLoss()
     segmented = False
