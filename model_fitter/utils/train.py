@@ -38,12 +38,12 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
             # Adam step
             optimizer.step()
         
-            if batch_idx % config.log_interval == 0:
+            if batch_idx % 2 == 0:
                 reporter.keep_log(
                     'Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tTP-loss: {:.6f}\tAugerino-loss: {:.6f}'.format(
                     epoch, batch_idx * len(base_data), len(loader.dataset),
                     100. * batch_idx / len(loader), loss.item(), tp_loss, augerino_loss)
                 )
     if config.model_type == 'augerino':
-        print(f"limits: {model.aug[0].lims}")
+        print(f"limits: {model.aug.lims}")
 

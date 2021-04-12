@@ -51,14 +51,13 @@ class GtzanDynamicDataset(Dataset):
         if model_type != 'augerino':
             self.e0 = mel_spec_params["e0"]
             
-            self.mel_spec_transform = nn.Sequential(
-                aud_transforms.MelSpectrogram(
-                        sample_rate=BASE_SAMPLE_RATE,
-                        n_mels=mel_spec_params["bands"],
-                        n_fft=mel_spec_params["window_size"],
-                        hop_length=mel_spec_params["hop_size"]
-                )
+            self.mel_spec_transform = aud_transforms.MelSpectrogram(
+                sample_rate=BASE_SAMPLE_RATE,
+                n_mels=mel_spec_params["bands"],
+                n_fft=mel_spec_params["window_size"],
+                hop_length=mel_spec_params["hop_size"]
             )
+            
             
 
 
@@ -69,7 +68,7 @@ class GtzanDynamicDataset(Dataset):
 
         if self.model_type == 'augerino':
             return (
-                wave_data[:478912].clone().detach().requires_grad_(True),
+                torch.stack(splitsongs(wave_data[:478912])),
                 [],
                 self.targets[index])
         

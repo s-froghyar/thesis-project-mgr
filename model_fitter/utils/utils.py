@@ -38,7 +38,8 @@ def get_model_loss(model, predictions, targets, config, device, x=None, transfor
     ''' Gets the losses for the model. Returns tuple of (model_loss, tp_loss, augerino_loss) '''
     targets = targets.to(device)
     num_of_patches = x.size(1)
-
+    if len(transformed_data) > 0:
+        transformed_data = transformed_data.to(device)
     base_loss = config.loss(predictions, targets)
     tp_loss = 0.0
     augerino_loss = 0.0

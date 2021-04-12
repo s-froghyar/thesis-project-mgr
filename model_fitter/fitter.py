@@ -16,14 +16,12 @@ class ModelFitter:
         self.reporter = reporter
 
         dataset_params = self.model_config.dataset_params
-        self.spectrogram_transform = (
-                aud_transforms.MelSpectrogram(
+        self.spectrogram_transform = aud_transforms.MelSpectrogram(
                     sample_rate=BASE_SAMPLE_RATE,
                     n_mels=dataset_params["bands"],
                     n_fft=dataset_params["window_size"],
                     hop_length=dataset_params["hop_size"]
                 )
-            )
 
 
     def fit(self): 
@@ -99,12 +97,13 @@ class ModelFitter:
         net = self.model_config.model().to(device=self.device, dtype=torch.float32)
         net.apply(init_layer)
 
-        chosen_augs = []
-        if self.model_config.aug_params.transform_chosen == 'ps': chosen_augs = [PitchShiftAug()]
-        elif self.model_config.aug_params.transform_chosen == 'ni': chosen_augs = [GaussianNoiseAug()]
-        else: chosen_augs = [GaussianNoiseAug(), PitchShiftAug()]
+        aug = None
+        if self.model_config.aug_params.transform_chosen == 'ps': aug = PitchShiftAug()
+        elif self.model_config.aug_params.transform_chosen == 'ni': aug = GaussianNoiseAug()
+        else: 
+            raise RuntimeError('no augmentation for augerino... a bit counterintuitive dont u think?')
 
-        aug = nn.Sequential(*tuple(chosen_augs), *self.spectrogram_transform).to(device=self.device)
+        aug = aug.to(device=self.device)
         self.model_config.model = AugAveragedModel(net, aug, get_model_prediction, self.device).to(device=self.device)
 
         out_optimizer = self.model_config.optimizer(self.model_config.model.parameters(), lr=self.model_config.lr)
