@@ -58,6 +58,8 @@ class Reporter():
             name: {self.name}
             log_path: {self.log_path}
             Optimizing for: {optim_message}
+            Batch size: {self.config.batch_size}
+            Epochs: {self.config.epochs}
             '''
         )
 
@@ -99,6 +101,7 @@ class Reporter():
 
     def reset_epoch_data(self):
         self.keep_log(f"Epoch finished with accuracy: {self.total_correct / self.train_set_len}")
+        self.keep_log(f"Epoch finished with tta accuracy: {self.tta_correct_val / 100}")
         self.total_loss = 0
         self.total_correct = 0
         self.tta_correct_val = 0
