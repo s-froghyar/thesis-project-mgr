@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: tpproject-baseline
+  name: tpproject-tp-ni-5
   namespace: 2267217fproject
 # this is where you define the content of the Job
 spec:
@@ -13,32 +13,38 @@ spec:
     spec:
       containers:
       - name: tpproject-training  
-        image: somaf/tp-project:baseline-test-5
+        image: somaf/tp-project:train-a5b51358020f3584574226bbd8bf835ad614d5a0
         command: 
           - "python"
         args:
           - "runner.py"
           - "--config"
-          - "baseline"
+          - "tp"
           - "--data-path"
           - "/nfs/data"
           - "--checkpoint"
           - "/nfs/checkpoints"
+          - "-t"
+          - "ni"
+          - "--title"
+          - "TP - 50 epochs - G Noise Inj (100x factor)"
+          - "--epoch"
+          - "50"
         resources:
           requests:
             # the "m" suffix here means "millicores", so 1 physical CPU
             # core = 1000m. this container requests 2000m = 2 physical cores
-            cpu: "1000m" 
+            cpu: "2000m" 
             # memory units are also defined by a suffix. typically this will
             # be "Mi" or "Gi" as appropriate
-            memory: "8Gi"
+            memory: "16Gi"
             # GPUs are slightly different as they're not natively supported
             # by Kubernetes. This indicates that the container requires 1 
             # GPU in order to run
             nvidia.com/gpu: 1 
           limits:
             cpu: "4000m" 
-            memory: "8Gi"
+            memory: "16Gi"
             nvidia.com/gpu: 1
         workingDir: /app
         volumeMounts:
@@ -59,7 +65,7 @@ spec:
       # a node with RTX 2080 Ti GPUs. To do the equivalent for the RTX Titan nodes, 
       # change "gpu2080ti" to "gputitan"
       nodeSelector:
-        node-role.ida/gpu2080ti: "true"
+        node-role.ida/gpu3090: "true"
       # determines what Kubernetes will do if the container inside the 
       # pod fails to start or crashes. This just tells it to give up
       # without retrying.

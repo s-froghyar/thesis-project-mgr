@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
+import gc
 
 from .augerino import *
 from .tp import *
@@ -47,6 +48,8 @@ def get_model_loss(model, predictions, targets, config, device, x=None, transfor
     if config.is_tangent_prop:
         for i in range(num_of_patches):
             tp_loss += config.gamma * get_tp_loss(x[:,i,:,:], predictions, config.e0, device, transformed_data[:,i,:,:], model)
+            gc.collect()
+            torch.cuda.empty_cache()
         tp_loss = tp_loss / num_of_patches
         base_loss = base_loss + tp_loss
     elif config.augerino:
