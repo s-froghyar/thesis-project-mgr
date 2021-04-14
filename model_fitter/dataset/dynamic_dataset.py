@@ -56,7 +56,7 @@ class GtzanDynamicDataset(Dataset):
                 n_mels=mel_spec_params["bands"],
                 n_fft=mel_spec_params["window_size"],
                 hop_length=mel_spec_params["hop_size"]
-            )
+            ).double()
             
             
 
@@ -75,9 +75,10 @@ class GtzanDynamicDataset(Dataset):
         aug_type = self.aug_params.transform_chosen
         
         if self.model_type == 'tp':
+            transformed_wd = self.augmentations[aug_type](wave_data, self.e0, True)
             return  (
                 self.get_patched_spectrograms(wave_data),
-                self.get_patched_spectrograms(self.augmentations[aug_type](wave_data, self.e0, True)),
+                self.get_patched_spectrograms(transformed_wd),
                 self.targets[index]
             )
         else:
@@ -107,7 +108,7 @@ class GtzanDynamicDataset(Dataset):
 
         patches = splitsongs(wd)
 
-        mel_specs = [self.mel_spec_transform(patch).to(self.device) for patch in patches]
+        mel_specs = [self.mel_spec_transform(patch).to(device=self.device, dtype=torch.float32) for patch in patches]
 
         return torch.stack(mel_specs)
 
