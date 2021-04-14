@@ -50,14 +50,12 @@ class GtzanTTADataset(Dataset):
 
         self.e0 = mel_spec_params["e0"]
         
-        self.mel_spec_transform = nn.Sequential(
-            aud_transforms.MelSpectrogram(
+        self.mel_spec_transform = aud_transforms.MelSpectrogram(
                     sample_rate=BASE_SAMPLE_RATE,
                     n_mels=mel_spec_params["bands"],
                     n_fft=mel_spec_params["window_size"],
                     hop_length=mel_spec_params["hop_size"]
-            )
-        )
+        ).double()
             
 
 

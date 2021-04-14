@@ -29,7 +29,7 @@ def get_model_prediction(model, batch_specs, device, model_type):
     num_of_patches = batch_specs.size(1)
     preds_sum = torch.from_numpy(np.zeros((batch_specs.shape[0], 10))).to(dtype=torch.float32, device=device)
     for i in range(num_of_patches):
-        strip_data = batch_specs[:,i,:,:]
+        strip_data = batch_specs[:,i,:,:].float()
         preds = model(strip_data)
         preds_sum += preds.to(dtype=torch.float32, device=device)
     return preds_sum
