@@ -54,5 +54,5 @@ class PitchShiftAug(nn.Module):
         out = torch.zeros_like(x)
         factor = torch.rand(bs, device=self.lims.device) * (factor_range[1] - factor_range[0]) + factor_range[0]
         for index, row in enumerate(x):
-            out[index] = torch.from_numpy(librosa.effects.pitch_shift(row.numpy(), BASE_SAMPLE_RATE, factor[index]))
+            out[index] = torch.from_numpy(librosa.effects.pitch_shift(row.cpu().numpy(), BASE_SAMPLE_RATE, factor[index]))
         return out.to(self.lims.device)

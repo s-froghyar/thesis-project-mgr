@@ -24,8 +24,8 @@ class AugAveragedModel(nn.Module):
                     n_mels=128,
                     n_fft=1024,
                     hop_length=256
-                )
-            ).double()
+                ).to(self.device)
+            ).double().to(self.device)
             num_of_patches = x.size(1)
             all_specs = []
             for i in range(num_of_patches):
