@@ -49,6 +49,7 @@ class Reporter():
         self.tp_losses = []
         self.tta_correct = []
         self.tta_correct_val = 0
+        self.aug_limits = []
 
         self.create_logging_env()
         self.train_summary_writer = SummaryWriter(f"{self.log_path}/tensorboard")
@@ -90,10 +91,7 @@ class Reporter():
         self.epoch_accuracies.append(self.total_correct / self.train_set_len)
 
         self.tta_correct.append(self.tta_correct_val)
-        # self.train_summary_writer.add_histogram("conv1.bias", model.conv1.bias, epoch)
-        # self.train_summary_writer.add_histogram("conv1.weight", model.conv1.weight, epoch)
-        # self.train_summary_writer.add_histogram("conv2.bias", model.conv2.bias, epoch)
-        # self.train_summary_writer.add_histogram("conv2.weight", model.conv2.weight, epoch)
+
         if (epoch-1) == self.config.epochs:
             print('report is available through tensorboard in the reports folder')
             self.train_summary_writer.close()
@@ -113,7 +111,8 @@ class Reporter():
             "epoch_accuracies": self.epoch_accuracies,
             "augerino_losses": self.augerino_losses,
             "tp_losses": self.tp_losses,
-            "tta_correct": self.tta_correct
+            "tta_correct": self.tta_correct,
+            "aug_limits": self.aug_limits
         }, f"{self.log_path}/model_metrics_e{epoch}")
     def save_predictions_for_cm(self, preds, targets, epoch):
         torch.save({
@@ -122,7 +121,8 @@ class Reporter():
         }, f"{self.log_path}/confusion_matrix_e{epoch}")
     def save_model(self, model, epoch):
         torch.save(model.state_dict(), f"{self.log_path}/e{epoch}_model.pt")
-    
+    def record_augerino_lims(self, limits):
+        self.aug_limits.append(limits)
     def keep_log(self, log_string):
         log_text = f"\n{str(datetime.datetime.now())}: {log_string}"
         with open(f"{self.log_path}/logs", 'a') as f:

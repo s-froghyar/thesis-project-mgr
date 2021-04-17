@@ -48,5 +48,6 @@ def train_model(model, config, reporter, device, loader, optimizer, epoch):
                 gc.collect()
                 torch.cuda.empty_cache()
     if config.model_type == 'augerino':
+        reporter.record_augerino_lims(model.aug.lims)
         print(f"limits: {model.aug.lims}")
 
