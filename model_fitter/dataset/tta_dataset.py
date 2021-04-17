@@ -50,14 +50,21 @@ class GtzanTTADataset(Dataset):
 
         self.e0 = mel_spec_params["e0"]
         
-        self.mel_spec_transform = aud_transforms.MelSpectrogram(
-                    sample_rate=BASE_SAMPLE_RATE,
-                    n_mels=mel_spec_params["bands"],
-                    n_fft=mel_spec_params["window_size"],
-                    hop_length=mel_spec_params["hop_size"]
-        ).double()
-            
-
+        self.mel_spec_transform = nn.Sequential( 
+                    aud_transforms.MelSpectrogram(
+                    sample_rate=16000,
+                    n_mels=128,
+                    n_fft=1024,
+                    hop_length=256
+                ).to(self.device),
+                aud_transforms.AmplitudeToDB().to(self.device)
+            ).double().to(self.device)  
+    # transform = aud_transforms.MelSpectrogram(
+    #                 sample_rate=BASE_SAMPLE_RATE,
+    #                 n_mels=mel_spec_params["bands"],
+    #                 n_fft=mel_spec_params["window_size"],
+    #                 hop_length=mel_spec_params["hop_size"]
+    #     ).double()
 
         
     def __getitem__(self, index):
