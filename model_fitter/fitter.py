@@ -31,7 +31,7 @@ class ModelFitter:
         self.reporter.train_set_len = len(train_loader.dataset)
         
         for epoch in range(self.model_config.epochs):
-            train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
+            # train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
             all_predictions, all_targets = test_model(model, self.model_config, self.reporter, self.device, test_loader, epoch)
             self.reporter.record_epoch_data(epoch)
             

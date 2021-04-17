@@ -56,8 +56,8 @@ class GtzanTTADataset(Dataset):
                     n_mels=128,
                     n_fft=1024,
                     hop_length=256
-                ).to(self.device),
-                aud_transforms.AmplitudeToDB().to(self.device)
+                ),
+                aud_transforms.AmplitudeToDB()
             ).double().to(self.device)  
     # transform = aud_transforms.MelSpectrogram(
     #                 sample_rate=BASE_SAMPLE_RATE,
@@ -94,7 +94,14 @@ class GtzanTTADataset(Dataset):
             wd = wd[:478912]
 
         patches = splitsongs(wd)
-        mel_specs = [self.mel_spec_transform(patch.to(self.device)).to(self.device) for patch in patches]
+        mel_specs = []
+        for patch in patches:
+            patch = patch.to(self.device)
+            try:
+                mel_specs.append(self.mel_spec_transform(patch))
+            except:
+                print('patch device', patch.device)
+                raise ValueError('something with the device again')
 
         return torch.stack(mel_specs)
 
