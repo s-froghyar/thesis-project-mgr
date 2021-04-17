@@ -94,7 +94,7 @@ class GtzanTTADataset(Dataset):
             wd = wd[:478912]
 
         patches = splitsongs(wd)
-        mel_specs = [self.mel_spec_transform(patch).to(self.device) for patch in patches]
+        mel_specs = [self.mel_spec_transform(patch.to(self.device)).to(self.device) for patch in patches]
 
         return torch.stack(mel_specs)
 

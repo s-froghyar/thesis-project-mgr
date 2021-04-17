@@ -9,8 +9,6 @@ from .augerino import unif_aug_loss, GaussianNoiseAug, PitchShiftAug
 
 def test_model(model, config, reporter, device, loader, epoch):
     ''' TTA '''
-    # if config.local:
-    #     model = model.float()
     
     model.eval()
     chosen_aug = config.aug_params.transform_chosen
