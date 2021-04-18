@@ -32,7 +32,7 @@ class CNNconfig:
             )
 
     aug_params = AugmentationParameters(
-        ni = (None, 9, 12),
+        ni = (0, 9, 12),
         ps = [-2, 0, 2]
     )
     tta_settings = {
