@@ -13,11 +13,6 @@ class AugAveragedModel(nn.Module):
         self.pred_getter = pred_getter
     def forward(self, x):
         if self.training:
-            # aug gens full spec from wave data, we need to split and make sum prediction
-            # full_spec = self.aug(x)
-            
-            # patches = torch.split(full_spec, 76, dim=2)
-            # split_specs = torch.stack(patches).permute(1,0,2,3)
             transform = nn.Sequential( 
                     aud_transforms.MelSpectrogram(
                     sample_rate=16000,

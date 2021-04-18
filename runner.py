@@ -21,6 +21,7 @@ parser.add_argument('--local', '-l', action='store_true', help='Don\'t use GPU a
 parser.add_argument('--checkpoint', default='checkpoints', help='the path to save checkpointed models to')
 parser.add_argument('--title', default='Straight learning', help='Enable crossvalidation')
 parser.add_argument('--test-only', default=False, action='store_true', help='Load the saved models from a training round and perform evaluation')
+parser.add_argument('--no-aug', default=False, action='store_true', help='No augmentation during training?')
 
 def main():
     args = parser.parse_args()
@@ -34,6 +35,9 @@ def main():
     if args.local:
         config.epochs = 4
         config.batch_size = 4
+
+    if args.no_aug:
+        config.aug_params.reset_params()
 
     config.aug_params.set_chosen_transform(args.transform)
 

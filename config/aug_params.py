@@ -17,7 +17,9 @@ class AugmentationParameters:
             ni_samples=NOISE_INJECTION_STEPS,
             ps_samples=PITCH_SHIFT_STEPS
         )
-    
+    def reset_params(self):
+        self.noise_injection = [0]
+        self.pitch_shift = [0]
     def get_options_of_chosen_transform(self):
         if self.transform_chosen == 'none':
             return [0]
