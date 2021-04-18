@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: tpproject-segmented-ni-50
+  name: tpproject-augerino-ps-50-amptoDB
   namespace: 2267217fproject
 # this is where you define the content of the Job
 spec:
@@ -19,15 +19,15 @@ spec:
         args:
           - "runner.py"
           - "--config"
-          - "segmented"
+          - "augerino"
           - "--data-path"
           - "/nfs/data"
           - "--checkpoint"
           - "/nfs/checkpoints"
           - "-t"
-          - "ni"
+          - "ps"
           - "--title"
-          - "Baseline - 50 epochs - G Noise"
+          - "Augerino - 50 epochs - Pitch Shift (100x factor) -> ampToDb"
           - "-e"
           - "50"
         resources:

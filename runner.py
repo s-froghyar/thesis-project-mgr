@@ -58,14 +58,6 @@ def main():
         model_fitter.fit()
 
 
-    # train_num_correct, test_num_correct = model_fitter.evaluate()
-    # print(train_num_correct, test_num_correct)
-    # reporter.keep_log(f'FINAL AVERAGE LOSS: {sum(losses) / len(losses)}')
-
-
-
-
-
 
 
 if __name__ == "__main__":    

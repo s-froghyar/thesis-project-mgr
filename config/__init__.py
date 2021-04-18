@@ -8,7 +8,7 @@ class CNNconfig:
     epochs = 5
     lr = 0.0005
     seed = 1
-    log_interval = 10
+    log_interval = 20
     save_model = True
     loss = torch.nn.CrossEntropyLoss()
     segmented = False
@@ -71,4 +71,11 @@ class AugerinoCNNconfig(CNNconfig):
     segmented = True
     is_tangent_prop = False
     augerino = True
+
+# class EvalCNNconfig:
+#     def __init__(self, model_type):
+#         if model_type == 'augerino':
+#             self.model = get_augerino_model()
+
+
 

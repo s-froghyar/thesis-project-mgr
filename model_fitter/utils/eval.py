@@ -4,12 +4,9 @@ import torch
 import torchaudio.transforms as aud_transforms
 
 from .utils import *
-from .tp import get_tp_loss
-from .augerino import unif_aug_loss, GaussianNoiseAug, PitchShiftAug
 
 def test_model(model, config, reporter, device, loader, epoch):
     ''' TTA '''
-    
     model.eval()
     chosen_aug = config.aug_params.transform_chosen
 
@@ -22,7 +19,7 @@ def test_model(model, config, reporter, device, loader, epoch):
             n_augs = 4
             if base_data.size(1) == 1:
                 n_augs = 1
-            preds = [get_model_prediction(model, base_data[:,i,:,:,:], device, config) for i in range(n_augs)]
+            preds = [get_model_prediction(model, base_data[:,i,:,:,:], device, config.model_type) for i in range(n_augs)]
             final_predictions = get_final_preds(preds, device)
 
             reporter.record_tta(final_predictions.to(device), targets.to(device))
@@ -58,3 +55,31 @@ def report_on_model(self):
                                 self.test_predictions.argmax(dim=1))
     
     return (train_num_correct, test_num_correct)
+
+
+
+
+def evaluate_model(model, loader, model_type):
+    model.eval()
+
+    device = torch.device('cpu')
+    all_targets = None
+    all_predictions = None
+    with torch.no_grad():
+        for batch_idx, (base_data, targets) in enumerate(loader):
+            base_data, targets = base_data.to(device), targets.to(device)
+            n_augs = 4
+            if base_data.size(1) == 1:
+                n_augs = 1
+            preds = [get_model_prediction(model, base_data[:,i,:,:,:], device, model_type) for i in range(n_augs)]
+            final_predictions = get_final_preds(preds, device)
+
+            if all_predictions is None:
+                all_predictions = final_predictions
+            else:
+                all_predictions = torch.vstack((all_predictions, final_predictions))
+            if all_targets is None:
+                all_targets = targets
+            else:
+                all_targets = torch.cat((all_targets, targets))
+    return all_predictions, all_targets

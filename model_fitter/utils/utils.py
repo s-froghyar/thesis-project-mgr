@@ -12,7 +12,7 @@ def get_final_preds(all_preds, device):
     out = torch.from_numpy(np.zeros((bs, 10))).to(dtype=torch.float32, device=device)
     for pred in all_preds:
         out += pred
-    return torch.div(out, 4)
+    return torch.div(out, len(all_preds))
 
 def generate_batch_of_spectrograms(data, config, device):
     batch_specs = torch.from_numpy(np.zeros((data.shape[0], 6, 256, 76)))
@@ -77,3 +77,5 @@ def get_batch_data(base, model_type, aug_ind):
         return base
     elif model_type == 'tp':
         return base
+def get_num_correct(preds, labels):
+    return preds.argmax(dim=1).eq(labels).sum().item()

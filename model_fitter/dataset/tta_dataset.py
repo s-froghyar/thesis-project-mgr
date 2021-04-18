@@ -85,6 +85,8 @@ class GtzanTTADataset(Dataset):
          
     def __len__(self):
         return len(self.X)
+    def set_tta_params(self, params):
+        self.tta = params
 
     def get_patched_spectrograms(self, wd):
         ''' Transforms wave data to Melspectrogram and returns 6 (256x76) shaped patches '''

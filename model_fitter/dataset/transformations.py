@@ -19,5 +19,6 @@ def gaussian_noise_injection(signal, SNR, is_tp):
     return signal + noise
 
 def pitch_shift(signal, factor, is_tp):
+    if factor == 0: return signal
     if is_tp: factor = factor * 100
     return librosa.effects.pitch_shift(signal.squeeze().numpy(), BASE_SAMPLE_RATE, factor)

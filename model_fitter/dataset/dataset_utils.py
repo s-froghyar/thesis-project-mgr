@@ -26,15 +26,12 @@ def get_data_frame(data_path, is_local):
     if is_local:
         temp_df_train = pd.read_csv(f"{data_path}/local_train.csv")
         temp_df_test = pd.read_csv(f"{data_path}/local_test.csv")
-        
-        temp_df_train['filePath'] = data_path + '/WAV/' + temp_df_train['label'] + '/norm/' + temp_df_train['filename'].str[:-2] + 'wav'
-        temp_df_test['filePath'] = data_path + '/WAV/' + temp_df_test['label'] + '/norm/' + temp_df_test['filename'].str[:-2] + 'wav'
     else:
         temp_df_train = pd.read_csv(f"{data_path}/features_30_sec_train.csv")
         temp_df_test = pd.read_csv(f"{data_path}/features_30_sec_test.csv")
         
-        temp_df_train['filePath'] = data_path + '/' + temp_df_train['label'] + '/norm/' + temp_df_train['filename'].str[:-2] + 'wav'
-        temp_df_test['filePath'] = data_path + '/' + temp_df_test['label'] + '/norm/' + temp_df_test['filename'].str[:-2] + 'wav'
+    temp_df_train['filePath'] = data_path + '/' + temp_df_train['label'] + '/norm/' + temp_df_train['filename'].str[:-2] + 'wav'
+    temp_df_test['filePath'] = data_path + '/' + temp_df_test['label'] + '/norm/' + temp_df_test['filename'].str[:-2] + 'wav'
     out = {
         'train': temp_df_train.loc[:, ['filePath', 'label']],
         'test': temp_df_test.loc[:, ['filePath', 'label']]

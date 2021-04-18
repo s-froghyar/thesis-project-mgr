@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: tpproject-tp-ps-5
+  name: tpproject-augerino-ni-50
   namespace: 2267217fproject
 # this is where you define the content of the Job
 spec:
@@ -13,21 +13,23 @@ spec:
     spec:
       containers:
       - name: tpproject-training  
-        image: somaf/tp-project:train-ee744ab0001c8abf8ed5cf9e501cd4b3e7625473
+        image: somaf/tp-project:train-7b7167c785dc5e4f2d869a4e9165842d248c63e7
         command: 
           - "python"
         args:
           - "runner.py"
           - "--config"
-          - "segmented"
+          - "augerino"
           - "--data-path"
           - "/nfs/data"
           - "--checkpoint"
           - "/nfs/checkpoints"
           - "-t"
-          - "ps"
+          - "ni"
           - "--title"
-          - "TP - 5 epochs - Pitch Shift (100x factor)"
+          - "Augerino - 50 epochs - G Noise Inj (100x factor) -> ampToDb"
+          - "-e"
+          - "50"
         resources:
           requests:
             # the "m" suffix here means "millicores", so 1 physical CPU

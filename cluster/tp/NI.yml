@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: tpproject-tp-ni-5
+  name: tpproject-tp-ni-50
   namespace: 2267217fproject
 # this is where you define the content of the Job
 spec:
@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: tpproject-training  
-        image: somaf/tp-project:train-a5b51358020f3584574226bbd8bf835ad614d5a0
+        image: somaf/tp-project:train-aba64c8d9deebab0cb51dee3e8f5526ec0795ece
         command: 
           - "python"
         args:
