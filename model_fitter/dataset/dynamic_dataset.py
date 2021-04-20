@@ -107,7 +107,7 @@ class GtzanDynamicDataset(Dataset):
         if isinstance(wd, np.ndarray):
             wd = torch.from_numpy(wd[:478912]).to(self.device)
         else:
-            wd = wd[:478912]
+            wd = wd[:478912].to(self.device)
 
         patches = splitsongs(wd)
 
