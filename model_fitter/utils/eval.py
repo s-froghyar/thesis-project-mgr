@@ -19,7 +19,7 @@ def test_model(model, config, reporter, device, loader, epoch):
             n_augs = 4
             if base_data.size(1) == 1:
                 n_augs = 1
-            preds = [get_model_prediction(model, base_data[:,i,:,:,:], device, config.model_type) for i in range(n_augs)]
+            preds = [get_model_prediction(model, base_data[:,i,:,:,:], device, config.model_type, is_eval=True) for i in range(n_augs)]
             final_predictions = get_final_preds(preds, device)
 
             reporter.record_tta(final_predictions.to(device), targets.to(device))
