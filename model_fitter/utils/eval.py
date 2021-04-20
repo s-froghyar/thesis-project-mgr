@@ -71,7 +71,7 @@ def evaluate_model(model, loader, model_type):
             n_augs = 4
             if base_data.size(1) == 1:
                 n_augs = 1
-            preds = [get_model_prediction(model, base_data[:,i,:,:,:], device, model_type) for i in range(n_augs)]
+            preds = [get_model_prediction(model, base_data[:,i,:,:,:], device, model_type, is_eval=True) for i in range(n_augs)]
             final_predictions = get_final_preds(preds, device)
 
             if all_predictions is None:

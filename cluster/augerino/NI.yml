@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: tpproject-training  
-        image: somaf/tp-project:train-7b7167c785dc5e4f2d869a4e9165842d248c63e7
+        image: somaf/tp-project:train-70ebcd179dab41a0a013f5e33c616cf11a6f9c7d
         command: 
           - "python"
         args:
@@ -27,7 +27,7 @@ spec:
           - "-t"
           - "ni"
           - "--title"
-          - "Augerino - 50 epochs - G Noise Inj (100x factor) -> ampToDb"
+          - "Augerino - 50 epochs - G Noise Inj"
           - "-e"
           - "50"
         resources:

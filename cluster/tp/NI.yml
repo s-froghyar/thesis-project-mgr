@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: tpproject-training  
-        image: somaf/tp-project:train-aba64c8d9deebab0cb51dee3e8f5526ec0795ece
+        image: somaf/tp-project:train-5a93f95e52b01d545622cac122fc22fd7d84e3ec
         command: 
           - "python"
         args:
@@ -27,7 +27,7 @@ spec:
           - "-t"
           - "ni"
           - "--title"
-          - "TP - 50 epochs - G Noise Inj (100x factor)"
+          - "TP - 50 epochs - G Noise Inj"
           - "--epoch"
           - "50"
         resources:

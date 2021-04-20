@@ -15,21 +15,13 @@ class ModelFitter:
         self.kwargs = kwargs
         self.reporter = reporter
 
-        dataset_params = self.model_config.dataset_params
-        self.spectrogram_transform = aud_transforms.MelSpectrogram(
-                    sample_rate=BASE_SAMPLE_RATE,
-                    n_mels=dataset_params["bands"],
-                    n_fft=dataset_params["window_size"],
-                    hop_length=dataset_params["hop_size"]
-                )
-
 
     def fit(self): 
         model, optimizer = self.init_model()
         train_loader, test_loader, metadata = self.get_data_loaders()
 
         self.reporter.train_set_len = len(train_loader.dataset)
-        
+        all_predictions, all_targets = None, None
         for epoch in range(self.model_config.epochs):
             train_model(model, self.model_config, self.reporter, self.device, train_loader, optimizer, epoch)
             all_predictions, all_targets = test_model(model, self.model_config, self.reporter, self.device, test_loader, epoch)
@@ -44,6 +36,8 @@ class ModelFitter:
             torch.cuda.empty_cache()
         self.reporter.save_model(model, 'final')
         self.reporter.save_metrics('final')
+        self.reporter.save_predictions_for_cm(all_predictions, all_targets, 'final')
+
 
 
     def get_data_loaders(self):

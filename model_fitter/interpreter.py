@@ -34,6 +34,7 @@ class Interpreter:
 
     def run_evaluation(self):
         out = {}
+        print('Running no augment test')
         # No aug
         augs = self.get_augs()
         test_loader = self.get_loader(augs[0])
@@ -44,6 +45,8 @@ class Interpreter:
             'predictions': no_aug_predictions,
             'targets': no_aug_targets
         }
+
+        print('Running normal TTA')
         # TTA
         aug = None
         test_loader = self.get_loader(augs[1])

@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: tpproject-no-aug-50
+  name: tpproject-segmented-ps-50
   namespace: 2267217fproject
 # this is where you define the content of the Job
 spec:
@@ -25,10 +25,9 @@ spec:
           - "--checkpoint"
           - "/nfs/checkpoints"
           - "-t"
-          - "ni"
+          - "ps"
           - "--title"
-          - "TP - 5 epochs - Pitch Shift (100x factor)"
-          - "--no-aug"
+          - "Baseline - 50 epochs - Pitch Shift"
           - "-e"
           - "50"
         resources:

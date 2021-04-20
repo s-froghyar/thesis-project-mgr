@@ -58,13 +58,7 @@ class GtzanTTADataset(Dataset):
                     hop_length=256
                 ),
                 aud_transforms.AmplitudeToDB()
-            ).double().to(self.device)  
-    # transform = aud_transforms.MelSpectrogram(
-    #                 sample_rate=BASE_SAMPLE_RATE,
-    #                 n_mels=mel_spec_params["bands"],
-    #                 n_fft=mel_spec_params["window_size"],
-    #                 hop_length=mel_spec_params["hop_size"]
-    #     ).double()
+            ).double().to(self.device)
 
         
     def __getitem__(self, index):

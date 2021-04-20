@@ -33,12 +33,13 @@ def main():
     state_dict = torch.load(model_path, map_location=torch.device('cpu'))
 
     interpreter = Interpreter((config.model, state_dict), config.aug_params, config.model_type)
+    print('Evaluation started...')
     results = interpreter.run_evaluation()
-
-    torch.save(results, f"data_interpreter/{args.config}/run_{args.run}/results.pt")
     print('Done!')
     print(f"No augmentation accuracy: {results['no_aug']['accuracy']}")
     print(f"TTA normal accuracy: {results['tta_normal']['accuracy']}")
+    torch.save(results, f"data_interpreter/results/{args.config}/{args.transform.upper()}/run_{args.run}/results.pt")
+    
 
 
 

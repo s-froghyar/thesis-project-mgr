@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: tpproject-tp-ps-5
+  name: tpproject-tp-ps-50
   namespace: 2267217fproject
 # this is where you define the content of the Job
 spec:
@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: tpproject-training  
-        image: somaf/tp-project:train-a5b51358020f3584574226bbd8bf835ad614d5a0
+        image: somaf/tp-project:train-5a93f95e52b01d545622cac122fc22fd7d84e3ec
         command: 
           - "python"
         args:
@@ -27,7 +27,7 @@ spec:
           - "-t"
           - "ps"
           - "--title"
-          - "TP - 50 epochs - G Noise Inj (100x factor)"
+          - "TP - 50 epochs - Pitch shift"
           - "--epoch"
           - "50"
         resources:
