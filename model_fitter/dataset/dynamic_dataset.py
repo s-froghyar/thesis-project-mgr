@@ -105,7 +105,7 @@ class GtzanDynamicDataset(Dataset):
     def get_patched_spectrograms(self, wd):
         ''' Transforms wave data to Melspectrogram and returns 6 (256x76) shaped patches '''
         if isinstance(wd, np.ndarray):
-            wd = torch.from_numpy(wd[:478912])
+            wd = torch.from_numpy(wd[:478912]).to(self.device)
         else:
             wd = wd[:478912]
 
