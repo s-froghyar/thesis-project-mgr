@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: tpproject-training  
-        image: somaf/tp-project:train-70ebcd179dab41a0a013f5e33c616cf11a6f9c7d
+        image: somaf/tp-project:train-fd7a3bfa5af8d01b41e412e843b9e2f063c9c360
         command: 
           - "python"
         args:
@@ -64,8 +64,8 @@ spec:
       # where the value of the "node-role.ida/gpu2080ti" annotation is true, i.e. on
       # a node with RTX 2080 Ti GPUs. To do the equivalent for the RTX Titan nodes, 
       # change "gpu2080ti" to "gputitan"
-      # nodeSelector:
-      #   node-role.ida/gpu3090: "true"
+      nodeSelector:
+        node-role.ida/gputitan: "true"
       # determines what Kubernetes will do if the container inside the 
       # pod fails to start or crashes. This just tells it to give up
       # without retrying.

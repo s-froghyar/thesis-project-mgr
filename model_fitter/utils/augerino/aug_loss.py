@@ -1,9 +1,8 @@
 import torch
 
 def unif_aug_loss(augs, aug_reg=0.01):
-    aug_loss = 0
-    
-    lims_aug =  augs.lims
-    aug_loss -= torch.abs(lims_aug[0] - lims_aug[1]) * aug_reg
+    sp = torch.nn.Softplus()
+    lims_aug =  sp(augs.log_lims)
+    aug_loss = (lims_aug).norm()
     
     return aug_loss

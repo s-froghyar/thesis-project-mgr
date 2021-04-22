@@ -34,9 +34,10 @@ class Interpreter:
 
     def run_evaluation(self):
         out = {}
-        print('Running no augment test')
-        # No aug
         augs = self.get_augs()
+        print('Running no augment test')
+        
+        # No aug
         test_loader = self.get_loader(augs[0])
         no_aug_predictions, no_aug_targets = evaluate_model(self.model, test_loader, self.model_type)
         no_aug_accuracy = get_num_correct(no_aug_predictions, no_aug_targets)
@@ -48,7 +49,6 @@ class Interpreter:
 
         print('Running normal TTA')
         # TTA
-        aug = None
         test_loader = self.get_loader(augs[1])
         tta_predictions, tta_targets = evaluate_model(self.model, test_loader, self.model_type)
         tta_accuracy = get_num_correct(tta_predictions, tta_targets)
@@ -58,8 +58,7 @@ class Interpreter:
             'targets': tta_targets
         }
         # # TTA custom limits
-        # aug = None
-        # test_loader = self.get_loader(aug)
+        # test_loader = self.get_loader(augs[2])
         # c_tta_predictions, c_tta_targets = evaluate_model(self.model, test_loader)
         
         return out

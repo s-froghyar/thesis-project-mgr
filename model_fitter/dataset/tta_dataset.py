@@ -56,8 +56,7 @@ class GtzanTTADataset(Dataset):
                     n_mels=128,
                     n_fft=1024,
                     hop_length=256
-                ),
-                aud_transforms.AmplitudeToDB()
+                )
             ).double().to(self.device)
 
         

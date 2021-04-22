@@ -20,8 +20,7 @@ class AugAveragedModel(nn.Module):
                     n_fft=1024,
                     hop_length=256
                 ).to(self.device),
-                aud_transforms.AmplitudeToDB().to(self.device)
-
+                # aud_transforms.AmplitudeToDB().to(self.device)
             ).double().to(self.device)
             num_of_patches = x.size(1)
             all_specs = []
