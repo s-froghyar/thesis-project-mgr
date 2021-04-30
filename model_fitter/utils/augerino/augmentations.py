@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import librosa
 import numpy as np
-from numpy.random import default_rng
 
 BASE_SAMPLE_RATE = 16000
 
@@ -23,11 +22,8 @@ class GaussianNoiseAug(nn.Module):
 
     def forward(self, x):
         bs = x.shape[0]
-        rng = default_rng()
         snr_range = torch.tensor([self.lims[0] * 12, self.lims[1] * 12])
         snr = torch.rand(bs, device=self.lims.device) * (snr_range[1] - snr_range[0]) + snr_range[0]
-
-         
 
         RMS_s = torch.sqrt(torch.mean(x**2, 1))
         RMS_n = torch.sqrt(RMS_s**2/(pow(10,snr/10)))

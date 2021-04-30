@@ -57,16 +57,24 @@ class Interpreter:
             'predictions': tta_predictions,
             'targets': tta_targets
         }
-        # # TTA custom limits
-        # test_loader = self.get_loader(augs[2])
-        # c_tta_predictions, c_tta_targets = evaluate_model(self.model, test_loader)
-        
+
+        print('Running custom TTA')
+        # TTA custom limits
+        test_loader = self.get_loader(augs[2])
+        c_tta_predictions, c_tta_targets = evaluate_model(self.model, test_loader, self.model_type)
+        tta_accuracy = get_num_correct(c_tta_predictions, c_tta_targets)
+
+        out['tta_custom'] = {
+            'accuracy': tta_accuracy / 100,
+            'predictions': c_tta_predictions,
+            'targets': c_tta_targets
+        }
         return out
     def get_augs(self):
         if self.aug_params.transform_chosen == 'ni':
-            return [None, (9., 12.)]
+            return [None, (9., 12.), (12 * 0.7649, 12 * 1.0591)]
         elif self.aug_params.transform_chosen == 'ps':
-            return [None, (-2., 2.)]
+            return [None, (-2., 2.),(2 * -0.8732,  2 * 0.5606)]
         else:
             return [None]
 

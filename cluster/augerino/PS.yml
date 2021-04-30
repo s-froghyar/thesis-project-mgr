@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: tpproject-training  
-        image: somaf/tp-project:train-fd7a3bfa5af8d01b41e412e843b9e2f063c9c360
+        image: somaf/tp-project:train-ee69bb81a6200a31931c6602009eb380b32fb88b
         command: 
           - "python"
         args:
@@ -34,7 +34,7 @@ spec:
           requests:
             # the "m" suffix here means "millicores", so 1 physical CPU
             # core = 1000m. this container requests 2000m = 2 physical cores
-            cpu: "2000m" 
+            cpu: "1000m" 
             # memory units are also defined by a suffix. typically this will
             # be "Mi" or "Gi" as appropriate
             memory: "16Gi"

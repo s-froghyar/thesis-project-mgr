@@ -28,19 +28,25 @@ def main():
     if args.config != 'no_aug':
         model_path = f"{model_path}/{args.transform.upper()}"
 
-    model_path = f"{model_path}/run_{args.run}/efinal_model.pt"
+    model_path = f"{model_path}/run_{args.run}/e39_model.pt"
     
     state_dict = torch.load(model_path, map_location=torch.device('cpu'))
 
     interpreter = Interpreter((config.model, state_dict), config.aug_params, config.model_type)
     print('Evaluation started...')
-    results = interpreter.run_evaluation()
-    print('Done!')
-    print(f"No augmentation accuracy: {results['no_aug']['accuracy']}")
-    print(f"TTA normal accuracy: {results['tta_normal']['accuracy']}")
-    torch.save(results, f"data_interpreter/results/{args.config}/{args.transform.upper()}/run_{args.run}/results.pt")
+    all_results = []
+    for i in range(5):
+        print(i+1)
+        results = interpreter.run_evaluation()
+        print('Done!')
+        print(f"No augmentation accuracy: {results['no_aug']['accuracy']}")
+        print(f"TTA normal accuracy: {results['tta_normal']['accuracy']}")
+        print(f"TTA custom accuracy: {results['tta_custom']['accuracy']}")
+        torch.save(results, f"data_interpreter/results/{args.config}/{args.transform.upper()}/run_{args.run}/results_{i+1}.pt")
+        all_results.append(results)
     
-
+    torch.save(all_results, f"data_interpreter/results/{args.config}/{args.transform.upper()}/all_results.pt")
+    
 
 
 if __name__ == "__main__":    

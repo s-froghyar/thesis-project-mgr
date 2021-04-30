@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: tpproject-training  
-        image: somaf/tp-project:train-fd7a3bfa5af8d01b41e412e843b9e2f063c9c360
+        image: somaf/tp-project:train-ee69bb81a6200a31931c6602009eb380b32fb88b
         command: 
           - "python"
         args:
