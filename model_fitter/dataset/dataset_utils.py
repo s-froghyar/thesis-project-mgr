@@ -44,7 +44,7 @@ def splitsongs(wd, overlap = 0.0):
 
     # Get the input song array size
     xshape = wd.shape[0]
-    chunk = 20000 # min wave arr len is 478.912 --> 12 chunks (128x188) with overlap (48000)
+    chunk = 20000
     offset = int(chunk*(1.-overlap))
 
     # Split the song and create new ones on windows

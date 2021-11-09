@@ -1,4 +1,21 @@
 import torch
+import matplotlib.pyplot as plt
+import numpy as np
+
+def save_image(name, img):
+    sizes = np.shape(img)
+    height = float(sizes[0])
+    width = float(sizes[1])
+     
+    fig = plt.figure()
+    fig.set_size_inches(width/height, 1, forward=False)
+    ax = plt.Axes(fig, [0., 0., 1., 1.])
+    ax.set_axis_off()
+    fig.add_axes(ax)
+ 
+    ax.matshow(img)
+    plt.savefig(name, dpi = height) 
+    plt.close()
 
 def get_tau(x, transformed_data, e0):
     return (transformed_data - x) / e0
@@ -10,6 +27,7 @@ def get_tp_loss(x, pred, e0, device, transformed_data, model):
     jacobian = torch.diagonal(jacobian, dim1=0, dim2=2).permute(3, 0, 1, 2).view(batch_size, output_count, 1, x_size_flat)
 
     tau = get_tau(x, transformed_data, e0)
+    save_image('tau', tau.detach().numpy()[0,:,:])
     tau_reshaped = tau.view(batch_size, 1, x_size_flat, 1).expand(-1, output_count, -1, -1)
     out = jacobian @ tau_reshaped
 

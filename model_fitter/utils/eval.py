@@ -2,6 +2,7 @@ from torch import nn
 import numpy as np
 import torch
 import torchaudio.transforms as aud_transforms
+import matplotlib.pyplot as plt
 
 from .utils import *
 
@@ -57,8 +58,49 @@ def report_on_model(self):
     return (train_num_correct, test_num_correct)
 
 
+def gather_outputs(model, dataset, transform_chosen, model_type):
+    model.eval()
+    device = torch.device('cpu')
+    with torch.no_grad():
+        for i in range(len(dataset)):
+            data, target, aug_options = dataset[i]
+            print(f"Aug option: {aug_options[0]}")
+            pred, imgs = model(data[0,5,:,:].to(device))
+
+            m = nn.Softmax()
+            pred = m(pred)
+
+            # save model outputs
+            save_path = f"visualisations/network_explr/{target}/{model_type}/{transform_chosen.upper()}"
+            # input
+            save_image(f"{save_path}/inpatch.jpeg", imgs[0])
+            # conv layers
+            for i in range(12):
+                save_image(f"{save_path}/conv1/conv1_fm_{i}.jpeg", imgs[1][i,:,:])
+                save_image(f"{save_path}/conv2/conv2_fm_{i}.jpeg", imgs[2][i,:,:])
+            print(data.shape)
+            line1 = [sum(imgs[3][ind:(ind+50)]) for ind in range(10)]
+
+            with open(f"{save_path}/arrs.txt", "w") as f:
+
+                f.writelines((str(line1), str(list(pred)), str(aug_options[0])))
 
 
+
+def save_image(name, img):
+    sizes = np.shape(img)
+    height = float(sizes[0])
+    width = float(sizes[1])
+     
+    fig = plt.figure()
+    fig.set_size_inches(width/height, 1, forward=False)
+    ax = plt.Axes(fig, [0., 0., 1., 1.])
+    ax.set_axis_off()
+    fig.add_axes(ax)
+ 
+    ax.matshow(img)
+    plt.savefig(name, dpi = height) 
+    plt.close()
 def evaluate_model(model, loader, model_type):
     model.eval()
 

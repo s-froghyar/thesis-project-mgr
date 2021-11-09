@@ -56,7 +56,8 @@ class GtzanTTADataset(Dataset):
                     n_mels=128,
                     n_fft=1024,
                     hop_length=256
-                )
+                ), 
+                # aud_transforms.AmplitudeToDB()
             ).double().to(self.device)
 
         
@@ -73,7 +74,7 @@ class GtzanTTADataset(Dataset):
             augs.append(
                 self.get_patched_spectrograms(augmented_wd)
             )
-        return (torch.stack(augs), self.targets[index])
+        return (torch.stack(augs), self.targets[index], aug_options) # <-- when collecting data
 
          
     def __len__(self):

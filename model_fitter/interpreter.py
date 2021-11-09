@@ -1,11 +1,7 @@
 from .dataset import load_path_data, GtzanTTADataset
 from .utils import *
-# from .utils import GaussianNoiseAug, PitchShiftAug, AugAveragedModel
-# import time
-# import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch
-# import torchaudio.transforms as aud_transforms
 
 class Interpreter:
     '''
@@ -26,11 +22,30 @@ class Interpreter:
         self.model_type = model_type
         self.device = torch.device('cpu')
 
-        self.model = self.get_model(model_combo)
+        self.model = self.get_model(model_combo).double()
 
         
         # self.test_loader = self.get_loader()
 
+    def run_data_extraction(self):
+        augs = self.get_augs()
+        samples = [
+            ('data/blues/norm/blues.00090.wav', 'blues'),
+            ('data/classical/norm/classical.00090.wav', 'classical'),
+            ('data/hiphop/norm/hiphop.00090.wav', 'hiphop'),
+            ('data/jazz/norm/jazz.00090.wav', 'jazz'),
+            ('data/reggae/norm/reggae.00090.wav', 'reggae')
+        ]
+        dataset = GtzanTTADataset(
+                    paths           = list(map(lambda el: el[0], samples)),
+                    labels          = list(map(lambda el: el[1], samples)),
+                    mel_spec_params = self.params,
+                    aug_params      = self.aug_params,
+                    device          = self.device,
+                    train           = False,
+                    tta_settings    = augs[2]
+                )
+        gather_outputs(self.model, dataset, self.aug_params.transform_chosen, self.model_type)
 
     def run_evaluation(self):
         out = {}
@@ -70,6 +85,7 @@ class Interpreter:
             'targets': c_tta_targets
         }
         return out
+
     def get_augs(self):
         if self.aug_params.transform_chosen == 'ni':
             return [None, (9., 12.), (12 * 0.7649, 12 * 1.0591)]

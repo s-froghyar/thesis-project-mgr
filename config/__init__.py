@@ -72,10 +72,5 @@ class AugerinoCNNconfig(CNNconfig):
     is_tangent_prop = False
     augerino = True
 
-# class EvalCNNconfig:
-#     def __init__(self, model_type):
-#         if model_type == 'augerino':
-#             self.model = get_augerino_model()
-
 
 

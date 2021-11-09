@@ -16,14 +16,23 @@ class SegmentedCNN(nn.Module):
 
         self.pool = F.max_pool2d
         self.dropout = nn.Dropout(p=0.5)
-        self.log_sm = nn.LogSoftmax(1)
         
     def forward(self, x):
+        # self.imgs = []
         x = x.unsqueeze(1)
-        x = F.relu(self.pool(self.conv1(x), 2))
-        x = F.relu(self.pool(self.conv2(x), 2))
-        x = x.reshape(x.shape[0], -1)
-        x = self.dropout(F.relu(self.fc1(x)))
-        x = self.fc2(x)
+        # x = x.unsqueeze(0)
+        # self.save_as_img(x)
+        x = self.pool(self.conv1(x), 2)
+        # self.save_as_img(x)
+        x = F.relu(x)
 
+        x = self.pool(self.conv2(x), 2)
+        # self.save_as_img(x)
+        x = F.relu(x)
+        x = x.reshape(x.shape[0], -1)
+
+        x = self.dropout(F.relu(self.fc1(x)))
+        # self.save_as_img(x)
+        
+        x = self.fc2(x)
         return x
